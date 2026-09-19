@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tópicos — IA sem Mistério</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="../04-apps/shared/estilo.css">
+  <style>
+    html, body { height: 100%; }
+    body { margin: 0; background: #101216; color: #fff; overflow: hidden; font-size: 20px; }
+    body.escolha { overflow: auto; background: var(--fundo); color: var(--texto); }
+
+    .palco { position: fixed; inset: 0; display: flex; flex-direction: column; padding: 4vh 5vw 9vh; }
+    .faixa-topo { height: 1.2vh; background: var(--cor, var(--destaque)); position: fixed; top: 0; left: 0; right: 0; }
+    .titulo-slide { font-size: clamp(40px, 6.2vw, 110px); font-weight: 800; line-height: 1.02; letter-spacing: -.02em; margin: 0 0 3vh; }
+    .texto-slide { font-size: clamp(26px, 3.2vw, 56px); line-height: 1.25; opacity: .92; }
+    .centro-v { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+
+    .regra { font-size: clamp(44px, 7vw, 130px); font-weight: 800; line-height: 1.08; }
+    .regra div:first-child { color: var(--destaque); }
+    .rodape-regra { font-size: clamp(24px, 2.6vw, 46px); margin-top: 3vh; font-weight: 700; opacity: .9; }
+
+    .midia-area { flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; gap: 2vw; }
+    .midia-area video { max-width: 100%; max-height: 62vh; border-radius: 18px; background: #000; }
+    /* A grade ocupa exatamente o espaço livre da tela (flex:1) e cada imagem encolhe para caber:
+       nunca invade o título nem a legenda, seja qual for a quantidade de imagens. */
+    .midia-area.grade { align-items: stretch; }
+    .grade-img { display: grid; grid-template-columns: repeat(var(--cols, 3), minmax(0, 1fr)); grid-auto-rows: minmax(0, 1fr);
+      gap: 1.4vw; width: 100%; height: 100%; min-height: 0; justify-items: center; align-items: center; }
+    .grade-img img { max-width: 100%; max-height: 100%; min-height: 0; object-fit: contain; border-radius: 14px; background: #222; }
+    .falta { border: 4px dashed #666; border-radius: 14px; display: flex; align-items: center; justify-content: center; text-align: center; padding: 20px; color: #aaa; font-size: clamp(16px, 1.4vw, 24px); min-height: 20vh; }
+
+    .botao-som { font-size: clamp(60px, 10vw, 180px); background: none; border: 6px solid var(--destaque); color: #fff; border-radius: 50%; width: 1.8em; height: 1.8em; cursor: pointer; }
+    .botao-som.tocando { background: var(--destaque); color: #101216; }
+    .transcricao-slide { font-size: clamp(26px, 3vw, 52px); font-style: italic; max-width: 70vw; text-align: center; margin-top: 3vh; white-space: pre-line; }
+    .alternativa { font-size: clamp(30px, 4vw, 72px); font-weight: 800; line-height: 1.25; text-align: left; }
+    .alternativa div + div { margin-top: 1.4vh; }
+
+    .revelar-slide { margin-top: 3vh; background: var(--destaque); color: #101216; border-radius: 22px; padding: 2vh 2.5vw; font-size: clamp(30px, 4vw, 72px); font-weight: 800; animation: surgir .3s; }
+
+    .comparar { display: grid; grid-template-columns: 1fr 1fr; gap: 2.5vw; flex: 1; min-height: 0; }
+    .lado { border-radius: 24px; padding: 3vh 2vw; display: flex; flex-direction: column; gap: 2vh; min-height: 0; }
+    .lado.ruim { background: #3a1512; border: 4px solid var(--perigos); }
+    .lado.bom { background: #0f2e20; border: 4px solid #22b573; }
+    .lado .rotulo { font-size: clamp(22px, 2.4vw, 42px); font-weight: 800; text-transform: uppercase; letter-spacing: .06em; }
+    .lado .txt { font-size: clamp(22px, 2.3vw, 40px); line-height: 1.3; }
+    .lado img { max-height: 34vh; object-fit: contain; border-radius: 12px; }
+
+    .chamada { display: grid; grid-template-columns: 1.4fr 1fr; gap: 4vw; align-items: center; flex: 1; }
+    .chamada .qr svg { width: min(46vh, 34vw); height: min(46vh, 34vw); }
+    .chamada .url { font-size: clamp(18px, 1.9vw, 34px); font-weight: 800; margin-top: 1.5vh; color: var(--destaque); overflow-wrap: anywhere; }
+
+    .pontos { position: fixed; left: 0; right: 0; bottom: 3vh; display: flex; justify-content: center; gap: 12px; }
+    .pontos span { width: 16px; height: 16px; border-radius: 50%; background: #444; }
+    .pontos span.atual { background: var(--destaque); transform: scale(1.3); }
+    .rotulo-show { position: fixed; left: 5vw; bottom: 2.6vh; font-size: 16px; opacity: .6; }
+    .dica-teclas { position: fixed; right: 5vw; bottom: 2.6vh; font-size: 14px; opacity: .45; }
+
+    .notas { position: fixed; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,.92); border-top: 4px solid var(--destaque); padding: 14px 5vw 18px; font-size: 22px; line-height: 1.4; z-index: 20; max-height: 40vh; overflow: auto; }
+    .notas .meta { color: var(--destaque); font-weight: 800; margin-bottom: 6px; }
+
+    .lista-shows { max-width: 900px; margin: 8vh auto; padding: 0 24px; }
+  </style>
+</head>
+<body>
+  <div id="raiz"></div>
+
+  <script src="../04-apps/shared/config.js"></script>
+  <script src="../04-apps/shared/qrcode.js"></script>
+  <script src="../04-apps/shared/util.js"></script>
+  <script src="shows.dados.js"></script>
+  <script>
+  (function () {
+    "use strict";
+    var EV = IA.EVENTO, el = IA.el, raiz = document.getElementById("raiz");
+    var SHOWS = window.SHOWS || {};
+    var idShow = IA.parametro("show");
+    var show = SHOWS[idShow];
+
+    /* ---------- Sem ?show=N: menu de escolha ---------- */
+    if (!show) {
+      document.body.className = "escolha";
+      var lista = el("div", { class: "lista-shows" }, [
+        el("h1", {}, ["Tópicos"]),
+        el("p", {}, ["Escolha o tópico. Dentro dele: → ou clique avança · ← volta · N mostra/esconde notas · F tela cheia · Home volta ao início."]),
+        Object.keys(SHOWS).length ? null : el("div", { class: "feedback errado" }, [el("div", { class: "titulo" }, ["shows.dados.js não encontrado ou vazio"])])
+      ]);
+      Object.keys(SHOWS).forEach(function (k) {
+        var s = SHOWS[k], t = IA.TRILHAS[s.trilha] || {};
+        lista.appendChild(el("a", { class: "cartao trilha clicavel " + (t.classe || ""), href: "?show=" + k,
+          style: "display:block;margin:14px 0;text-decoration:none;color:inherit" }, [
+          el("h2", { style: "color:var(--cor);margin:0" }, [(t.icone || "") + " Tópico " + k + ": " + s.titulo]),
+          el("p", { style: "margin:6px 0 0" }, [s.telas.length + " telas"])
+        ]));
+      });
+      raiz.appendChild(lista);
+      return;
+    }
+
+    // Troca [NOME] pelo primeiro nome do instrutor (config.js), se já preenchido
+    var primeiroNome = ((EV.instrutor && EV.instrutor.nome) || "").trim().split(/\s+/)[0];
+    if (primeiroNome && !/^seu$/i.test(primeiroNome)) {
+      show.telas.forEach(function (t) {
+        ["titulo", "texto", "transcricao", "legenda", "revelar", "notas", "rodape"].forEach(function (k) {
+          if (typeof t[k] === "string") t[k] = t[k].replace(/\[NOME\]/g, primeiroNome);
+        });
+      });
+    }
+
+    var trilha = IA.TRILHAS[show.trilha] || {};
+    document.body.className = trilha.classe || "";
+    document.title = "Tópico " + idShow + " — " + show.titulo;
+
+    var atual = 0, passoRevelar = false, notasVisiveis = false, inicioShow = null;
+    var audioAtual = null;
+
+    function imagemOuFalta(src) {
+      var img = el("img", { src: src, alt: "" });
+      img.onerror = function () { img.replaceWith(el("div", { class: "falta" }, ["Imagem ainda não criada:", el("br"), src])); };
+      return img;
+    }
+
+    function pararMidia() {
+      if (audioAtual) { try { audioAtual.pause(); } catch (e) {} audioAtual = null; }
+      Array.prototype.forEach.call(document.querySelectorAll("video"), function (v) { try { v.pause(); } catch (e) {} });
+    }
+
+    function desenhar() {
+      pararMidia();
+      raiz.innerHTML = "";
+      var t = show.telas[atual];
+      var palco = el("div", { class: "palco" });
+      raiz.appendChild(el("div", { class: "faixa-topo" }));
+      raiz.appendChild(palco);
+
+      if (t.tipo === "regra") {
+        palco.appendChild(el("div", { class: "centro-v" }, [
+          t.titulo ? el("div", { class: "texto-slide", style: "text-transform:uppercase;letter-spacing:.08em;margin-bottom:2vh" }, [t.titulo]) : null,
+          el("div", { class: "regra" }, (t.linhas || []).map(function (l) { return el("div", {}, [l]); })),
+          t.rodape ? el("div", { class: "rodape-regra" }, [t.rodape]) : null
+        ]));
+      } else if (t.tipo === "frase") {
+        palco.appendChild(el("div", { class: "centro-v" }, [
+          el("h1", { class: "titulo-slide", style: "font-size:clamp(48px,8vw,150px)" }, [t.titulo]),
+          t.texto ? el("div", { class: "texto-slide" }, [t.texto]) : null
+        ]));
+      } else if (t.tipo === "audio") {
+        var audio = new Audio(t.midia);
+        var falta = false;
+        var btn = el("button", { class: "botao-som", type: "button", title: "Tocar (Enter)" }, ["▶"]);
+        var area = el("div", { class: "midia-area", style: "flex-direction:column" }, [btn]);
+        var transc = t.transcricao ? el("div", { class: "transcricao-slide" + (t.mostrarTranscricao ? "" : " oculto") }, [t.mostrarTranscricao ? t.transcricao : "“" + t.transcricao.replace(/^[“"]|[”"]$/g, "") + "”"]) : null;
+        if (transc) area.appendChild(transc);
+        audio.addEventListener("error", function () {
+          falta = true;
+          btn.replaceWith(el("div", { class: "falta", style: "min-width:50vw" }, ["Áudio ainda não preparado:", el("br"), t.midia, el("br"), "Leia a transcrição em voz alta (tecla T)."]));
+          if (transc) transc.classList.remove("oculto");
+        });
+        audio.addEventListener("play", function () { btn.classList.add("tocando"); btn.textContent = "❚❚"; });
+        audio.addEventListener("pause", function () { btn.classList.remove("tocando"); btn.textContent = "▶"; });
+        audio.addEventListener("ended", function () { if (transc) transc.classList.remove("oculto"); });
+        btn.addEventListener("click", function (ev) { ev.stopPropagation(); btn.blur(); if (audio.paused) audio.play(); else audio.pause(); });
+        audioAtual = audio;
+        palco.appendChild(el("h1", { class: "titulo-slide" }, [t.titulo]));
+        palco.appendChild(area);
+        palco._alternarTranscricao = function () { if (transc) transc.classList.toggle("oculto"); };
+        palco._tocar = function () { if (!falta) { if (audio.paused) audio.play(); else audio.pause(); } };
+      } else if (t.tipo === "video") {
+        var v = el("video", { src: t.midia, controls: true, preload: "auto" });
+        var areaV = el("div", { class: "midia-area" }, [v]);
+        v.addEventListener("error", function () {
+          v.replaceWith(t.alternativa
+            ? el("div", { class: "alternativa" }, t.alternativa.map(function (l) { return el("div", {}, [l]); }))
+            : el("div", { class: "falta", style: "min-width:50vw;min-height:40vh" }, ["Vídeo ainda não preparado:", el("br"), t.midia]));
+        });
+        v.addEventListener("click", function (ev) { ev.stopPropagation(); });
+        palco.appendChild(el("h1", { class: "titulo-slide" }, [t.titulo]));
+        palco.appendChild(areaV);
+        if (t.legenda) palco.appendChild(el("div", { class: "texto-slide", style: "text-align:center;margin-top:2vh;color:var(--destaque);font-weight:800" }, [t.legenda]));
+        palco._tocar = function () { if (v.paused) v.play(); else v.pause(); };
+      } else if (t.tipo === "imagens") {
+        var srcs = [].concat(t.midia || []);
+        // Com revelarSozinho, ao revelar somem título e legenda: fica só a imagem + a resposta
+        var soRevelacao = !!(t.revelarSozinho && t.revelar && passoRevelar);
+        var colunas = srcs.length <= 4 ? Math.max(srcs.length, 1) : 3;
+        if (!soRevelacao) palco.appendChild(el("h1", { class: "titulo-slide" }, [t.titulo]));
+        palco.appendChild(el("div", { class: "midia-area grade" }, [
+          el("div", { class: "grade-img", style: "--cols:" + colunas }, srcs.map(imagemOuFalta))
+        ]));
+        if (t.legenda && !soRevelacao) palco.appendChild(el("div", { class: "texto-slide", style: "text-align:center;margin-top:2vh" }, [t.legenda]));
+      } else if (t.tipo === "comparar") {
+        palco.appendChild(el("h1", { class: "titulo-slide" }, [t.titulo]));
+        palco.appendChild(el("div", { class: "comparar" }, [["esquerda", "ruim"], ["direita", "bom"]].map(function (par) {
+          var lado = t[par[0]] || {};
+          return el("div", { class: "lado " + par[1] }, [
+            el("div", { class: "rotulo" }, [lado.rotulo || ""]),
+            lado.texto ? el("div", { class: "txt" }, [lado.texto]) : null,
+            lado.midia ? imagemOuFalta(lado.midia) : null
+          ]);
+        })));
+      } else if (t.tipo === "chamada") {
+        var m = EV.marca || {};
+        var codigo = IA.qr(m.linkMateriais, 400);
+        palco.appendChild(el("div", { class: "chamada" }, [
+          el("div", {}, [
+            el("h1", { class: "titulo-slide" }, [t.titulo]),
+            t.texto ? el("div", { class: "texto-slide" }, [t.texto]) : null,
+          ]),
+          el("div", { style: "text-align:center" }, [
+            codigo || el("div", { class: "falta", style: "min-height:34vh" }, ["QR Code aparece aqui quando linkMateriais estiver preenchido em config.js"]),
+            codigo ? el("div", { class: "texto-slide", style: "margin-top:1.5vh;font-size:clamp(20px,2vw,34px)" }, ["Aponte a câmera do celular"]) : null,
+            m.linkMateriais ? el("div", { class: "url" }, [IA.urlCurta(m.linkMateriais)]) : null
+          ])
+        ]));
+      } else {
+        palco.appendChild(el("h1", { class: "titulo-slide" }, [t.titulo || "(tela sem tipo)"]));
+        if (t.texto) palco.appendChild(el("div", { class: "texto-slide" }, [t.texto]));
+      }
+
+      if (t.revelar && passoRevelar) {
+        palco.appendChild(el("div", { class: "revelar-slide" }, [t.revelar]));
+      }
+
+      // Rodapé: pontos de progresso, rótulo do show, notas
+      raiz.appendChild(el("div", { class: "pontos" }, show.telas.map(function (_, i) { return el("span", { class: i === atual ? "atual" : "" }); })));
+      raiz.appendChild(el("div", { class: "rotulo-show" }, [(trilha.icone || "") + " Tópico " + idShow + " · " + (atual + 1) + "/" + show.telas.length]));
+      raiz.appendChild(el("div", { class: "dica-teclas" }, ["→ avança · ← volta · N notas · Enter toca · F tela cheia"]));
+      raiz._palco = palco;
+      desenharNotas();
+    }
+
+    // Notas ficam numa camada separada: abrir/fechar ou atualizar o relógio NÃO interrompe áudio/vídeo
+    function desenharNotas() {
+      var antiga = raiz.querySelector(".notas");
+      if (antiga) antiga.remove();
+      if (!notasVisiveis) return;
+      var t = show.telas[atual];
+      var decorrido = inicioShow ? Math.floor((Date.now() - inicioShow) / 1000) : 0;
+      raiz.appendChild(el("div", { class: "notas" }, [
+        el("div", { class: "meta" }, ["Tela " + (atual + 1) + "/" + show.telas.length + " · tempo do tópico " + Math.floor(decorrido / 60) + ":" + ("0" + decorrido % 60).slice(-2) +
+          (t.revelar && !passoRevelar ? " · próximo clique REVELA" : "")]),
+        el("div", {}, [t.notas || "(sem notas)"])
+      ]));
+    }
+
+    function avancar() {
+      if (!inicioShow) inicioShow = Date.now();
+      var t = show.telas[atual];
+      if (t.revelar && !passoRevelar) { passoRevelar = true; desenhar(); return; }
+      if (atual < show.telas.length - 1) { atual++; passoRevelar = false; desenhar(); }
+    }
+    function voltar() {
+      if (passoRevelar) { passoRevelar = false; desenhar(); return; }
+      if (atual > 0) { atual--; passoRevelar = !!show.telas[atual].revelar; desenhar(); }
+    }
+
+    document.addEventListener("keydown", function (e) {
+      var k = e.key;
+      if (k === "ArrowRight" || k === "PageDown" || k === " " ) { e.preventDefault(); avancar(); }
+      else if (k === "ArrowLeft" || k === "PageUp" || k === "Backspace") { e.preventDefault(); voltar(); }
+      else if (k === "Home") { atual = 0; passoRevelar = false; desenhar(); }
+      else if (k === "End") { atual = show.telas.length - 1; passoRevelar = false; desenhar(); }
+      else if (k === "n" || k === "N") { notasVisiveis = !notasVisiveis; desenharNotas(); }
+      else if (k === "t" || k === "T") { if (raiz._palco && raiz._palco._alternarTranscricao) raiz._palco._alternarTranscricao(); }
+      else if (k === "Enter" || k === "p" || k === "P") {
+        // Evita tocar/pausar duas vezes quando o botão ▶ está com foco
+        e.preventDefault();
+        if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+        if (raiz._palco && raiz._palco._tocar) raiz._palco._tocar();
+      }
+      else if (k === "f" || k === "F") {
+        if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(function () {});
+        else document.exitFullscreen();
+      } else if (/^[1-9]$/.test(k) && +k <= show.telas.length) { atual = +k - 1; passoRevelar = false; desenhar(); }
+    });
+    document.addEventListener("click", function (e) {
+      if (e.target.closest("button, video, a")) return;
+      avancar();
+    });
+    setInterval(function () { if (notasVisiveis) desenharNotas(); }, 15000);
+
+    desenhar();
+  })();
+  </script>
+</body>
+</html>

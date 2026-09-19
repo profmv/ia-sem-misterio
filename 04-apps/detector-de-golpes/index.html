@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Golpe ou seguro? — Não caia em golpe</title>
+  <link rel="stylesheet" href="../shared/estilo.css">
+  <style>
+    .conteudo { padding-top: 14px; padding-bottom: 14px; }
+
+    /* ---------- Início ---------- */
+    .inicio-faixa { padding: 40px 24px; }
+    .inicio-faixa .icone-grande { font-size: 5rem; line-height: 1; }
+    .inicio-faixa p { font-size: 1.45rem; max-width: 780px; margin: 0 auto 28px; }
+    .inicio-exemplo { display: flex; justify-content: center; gap: 18px; margin-top: 18px; color: var(--texto-suave); font-weight: 700; }
+
+    /* ---------- Rodada ---------- */
+    .rodada-topo { display: flex; align-items: center; gap: 16px; margin-bottom: 8px; }
+    .rodada-topo h2 { margin: 0; font-size: 1.3em; white-space: nowrap; }
+    .rodada-topo .progresso { flex: 1; margin: 0; }
+    .rodada-topo .btn { min-height: 48px; padding: 6px 18px; font-size: .95rem; }
+    .situacao {
+      max-width: 880px; margin: 0 auto 10px; padding: 6px 14px;
+      background: var(--cor-clara); border-left: 8px solid var(--cor); border-radius: 10px;
+      font-weight: 600; line-height: 1.35;
+    }
+    .palco { display: flex; justify-content: center; margin-bottom: 14px; }
+    .respostas { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; max-width: 880px; margin: 0 auto; }
+    .btn-resposta { min-height: 92px; font-size: 1.75rem; border-radius: 22px; letter-spacing: .03em; color: #fff; }
+    .btn-resposta .ico { font-size: 2.1rem; }
+    .btn-resposta.golpe { background: var(--errado); }
+    .btn-resposta.seguro { background: var(--certo); }
+    body.simples .btn-resposta { min-height: 104px; font-size: 2rem; }
+
+    /* ---------- Balão (visual de cada canal) ---------- */
+    .balao {
+      width: 100%; max-width: 880px; text-align: left; font-size: .95em; line-height: 1.42;
+      background: #fff; border: 2px solid var(--borda); border-radius: 18px; overflow: hidden; box-shadow: var(--sombra);
+    }
+    .balao .cab { display: flex; align-items: center; gap: 12px; padding: 8px 16px; }
+    .balao .avatar {
+      width: 44px; height: 44px; flex: none; border-radius: 50%; background: #fff;
+      display: flex; align-items: center; justify-content: center; font-size: 1.5rem;
+    }
+    .balao .nome { font-weight: 800; line-height: 1.2; }
+    .balao .sub { font-size: .78em; line-height: 1.25; }
+    .balao .corpo { padding: 12px 16px; }
+    .aviso-numero { display: inline-block; margin-top: 2px; padding: 1px 10px; border-radius: 999px; background: #FFE082; color: #3A2A00; font-weight: 800; }
+    .hora { display: block; text-align: right; font-size: .72em; color: #5B6470; margin-top: 2px; }
+    .rot-transcricao { font-size: .72em; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; color: #4A4F57; margin-top: 6px; }
+    .transcrito { font-style: italic; }
+
+    /* WhatsApp */
+    .balao.zap .cab { background: #1F5E54; color: #fff; }
+    .balao.zap .corpo { background: #ECE5DD; }
+    .balao.zap .msg { background: #fff; border-radius: 4px 14px 14px 14px; padding: 8px 12px; max-width: 94%; box-shadow: 0 1px 1px rgba(0,0,0,.12); }
+    .encaminhado { font-size: .78em; color: #5B6470; font-style: italic; margin-bottom: 4px; }
+    .audio { display: flex; align-items: center; gap: 10px; font-weight: 800; color: #1F5E54; }
+    .audio .play { width: 34px; height: 34px; border-radius: 50%; background: #1F5E54; color: #fff; display: flex; align-items: center; justify-content: center; font-size: .9em; }
+    .audio .onda { flex: 1; min-width: 120px; height: 20px; border-radius: 4px; background: repeating-linear-gradient(90deg, #6E9E96 0 3px, transparent 3px 7px); }
+    .video-falso { display: flex; align-items: center; justify-content: center; gap: 10px; height: 64px; margin-bottom: 6px; border-radius: 10px; background: #26292E; color: #fff; font-weight: 800; }
+    .anexo { display: inline-block; margin-bottom: 6px; padding: 4px 10px; border-radius: 8px; background: #F1F3F4; font-weight: 700; font-size: .85em; }
+
+    /* SMS */
+    .balao.sms .cab { background: #EEF1F5; border-bottom: 1px solid var(--borda); }
+    .balao.sms .avatar { background: #D5DBE3; }
+    .balao.sms .msg { background: #E6EAF0; border-radius: 16px 16px 16px 4px; padding: 10px 14px; max-width: 94%; }
+
+    /* Ligação */
+    .balao.ligacao { background: #15202B; color: #fff; border-color: #15202B; }
+    .balao.ligacao .cab { padding: 10px 18px; }
+    .balao.ligacao .tel { font-size: 2.3em; line-height: 1; animation: tocar 1.2s infinite; }
+    .balao.ligacao .corpo { margin: 0 12px 12px; border-radius: 12px; background: #fff; color: var(--texto); }
+    .balao.ligacao .botoes-tel { margin-left: auto; display: flex; gap: 10px; font-size: 1.3em; }
+    .balao.ligacao .botoes-tel span { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+    @keyframes tocar { 0%, 100% { transform: rotate(0); } 20% { transform: rotate(-14deg); } 40% { transform: rotate(14deg); } 60% { transform: rotate(0); } }
+
+    /* E-mail */
+    .balao.email .cab { display: block; background: #F3F4F6; border-bottom: 1px solid var(--borda); }
+    .balao.email .de { font-size: .85em; }
+    .balao.email .assunto { font-weight: 800; }
+
+    /* Anúncio */
+    .balao.anuncio .cab { border-bottom: 1px solid var(--borda); }
+    .balao.anuncio .avatar { background: #F1F3F4; }
+    .grade-anuncio { display: grid; grid-template-columns: 190px 1fr; gap: 14px; align-items: center; padding: 12px 16px; }
+    .midia-falsa {
+      position: relative; height: 150px; border-radius: 12px; font-size: 3.6em;
+      display: flex; align-items: center; justify-content: center;
+      background: linear-gradient(135deg, #FFD9A8, #F28B82);
+    }
+    .midia-falsa .legenda { position: absolute; left: 6px; right: 6px; bottom: 6px; padding: 2px 6px; border-radius: 6px; background: rgba(0,0,0,.7); color: #fff; font-size: .72rem; font-weight: 800; text-align: center; line-height: 1.25; }
+    .cta-falso { display: inline-block; margin-top: 6px; padding: 3px 14px; border-radius: 8px; background: #0D5FC7; color: #fff; font-weight: 800; font-size: .85em; }
+
+    /* QR Code */
+    .grade-qr { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: center; padding: 12px 16px; }
+    .cartaz { padding: 8px; text-align: center; background: #FFF7D6; border: 3px dashed #9A7A00; border-radius: 12px; }
+    .cartaz .titulo-cartaz { font-weight: 900; font-size: 1.1em; }
+    .cartaz .aviso-cartaz { font-weight: 800; font-size: .8em; color: #7A1C15; }
+    .qr-falso { width: 104px; height: 104px; margin: 6px auto; padding: 5px; background: #fff; border: 2px solid #000; display: grid; grid-template-columns: repeat(11, 1fr); }
+    .qr-falso i.p { background: #000; }
+    .tela-banco { padding: 10px 14px; border: 3px solid #2B2F77; border-radius: 16px; background: #fff; }
+    .tela-banco .valor { font-size: 1.5em; font-weight: 900; }
+    .tela-banco .para { font-size: 1.15em; font-weight: 800; }
+    .tela-banco .falso-btn { display: inline-block; margin-top: 6px; padding: 2px 14px; border-radius: 999px; background: #2B2F77; color: #fff; font-weight: 800; font-size: .85em; }
+
+    /* Loja */
+    .balao.loja .cab { background: #F3F4F6; border-bottom: 1px solid var(--borda); font-size: .85em; }
+    .barra-endereco { flex: 1; padding: 2px 12px; border: 1px solid var(--borda); border-radius: 999px; background: #fff; }
+    .grade-loja { display: grid; grid-template-columns: 150px 1fr; gap: 14px; align-items: center; padding: 10px 16px; }
+    .foto-produto { height: 130px; border-radius: 12px; font-size: 4em; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #E3EEFC, #C3D4F2); }
+    .produto { font-weight: 800; }
+    .estrelas { color: #8A5A00; font-size: .85em; }
+    .preco-antigo { text-decoration: line-through; color: var(--texto-suave); font-size: .85em; }
+    .preco { font-size: 1.45em; font-weight: 900; color: #0B7A4B; line-height: 1.1; }
+    .selo-loja { display: inline-block; padding: 1px 10px; border-radius: 8px; background: #FDE8E6; color: #7A1C15; font-weight: 800; font-size: .82em; }
+    .selo-loja.ok { background: #E2F5EC; color: #0B5A38; }
+    .desc-loja { font-size: .86em; margin-top: 4px; }
+
+    /* App */
+    .balao.app .cab { background: #2B2F77; color: #fff; }
+    .notificacao { padding: 10px 14px; border: 2px solid #2B2F77; border-radius: 14px; background: #F2F3FF; }
+    .notificacao .tit { font-weight: 800; }
+
+    /* Versão compacta (tela de explicação) */
+    .balao.compacto { font-size: .8em; box-shadow: none; }
+    .balao.compacto .avatar { width: 34px; height: 34px; font-size: 1.15rem; }
+    .balao.compacto .cab { padding: 6px 12px; }
+    .balao.compacto .corpo { padding: 8px 12px; }
+    .balao.compacto .grade-anuncio { grid-template-columns: 110px 1fr; padding: 8px 12px; }
+    .balao.compacto .midia-falsa { height: 100px; font-size: 2.4em; }
+    .balao.compacto .grade-loja { grid-template-columns: 90px 1fr; padding: 8px 12px; }
+    .balao.compacto .foto-produto { height: 90px; font-size: 2.6em; }
+    .balao.compacto .grade-qr { gap: 10px; padding: 8px 12px; }
+    .balao.compacto .qr-falso { width: 76px; height: 76px; }
+    .balao.compacto .video-falso { height: 44px; }
+    .balao.compacto.ligacao .tel { font-size: 1.8em; }
+    .balao.compacto.ligacao .botoes-tel { display: none; }
+
+    /* ---------- Explicação (feedback) ---------- */
+    .fb-grade { display: grid; grid-template-columns: minmax(0, 40fr) minmax(0, 60fr); gap: 22px; align-items: start; }
+    .rotulo-col { font-size: .8rem; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; color: var(--texto-suave); margin: 0 0 4px; }
+    .fb-grade .situacao { font-size: .82em; margin-bottom: 6px; border-left-width: 6px; }
+    #fb-resultado.feedback { margin: 0 0 4px; padding: 6px 14px; border-width: 3px; }
+    #fb-resultado .titulo { font-size: 1.5em; line-height: 1.15; margin: 0; }
+    #fb-resultado .voce { font-size: .85em; font-weight: 600; line-height: 1.3; }
+    .fb-tit { font-weight: 800; margin: 2px 0 0; line-height: 1.3; }
+    .alerta-lista.fb-sinais li { padding: 2px 0 2px 34px; font-size: .92em; line-height: 1.3; }
+    .alerta-lista.fb-sinais li::before { top: 1px; font-size: 1.05rem; }
+    .fazer { margin-top: 6px; padding: 5px 12px; border: 3px solid var(--cor); border-radius: 14px; background: #fff; font-size: .92em; line-height: 1.35; }
+    .fazer strong { color: var(--cor); }
+    .selo-ia { margin-top: 6px; padding: 4px 12px; border: 2px solid #6230C9; border-radius: 12px; background: #EEE6FD; color: #33186F; font-size: .85em; font-weight: 600; line-height: 1.3; }
+    .fb-acoes { display: flex; justify-content: flex-end; align-items: center; gap: 12px; margin-top: 8px; }
+    .fb-acoes .btn { min-height: 64px; padding: 8px 28px; }
+    .fb-acoes .btn.cor { font-size: 1.3rem; }
+    body.simples .fb-acoes .btn { min-height: 72px; }
+    .balao.compacto.zap .cab > div:last-child { display: none; }
+
+    /* ---------- Resultado ---------- */
+    .placar { font-size: 2.6em; font-weight: 900; line-height: 1.1; margin: 0 0 4px; }
+    .placar .num { color: var(--cor); }
+    .faixa-msg { font-size: 1.2em; margin: 0 auto 14px; max-width: 900px; }
+    .regra {
+      max-width: 980px; margin: 0 auto; padding: 16px 20px; border-radius: var(--raio);
+      background: var(--cor); color: #fff; text-align: center;
+    }
+    .regra .passos-regra { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 14px; font-size: 1.6em; font-weight: 900; line-height: 1.2; }
+    .regra .passos-regra span { white-space: nowrap; }
+    .regra .seta { opacity: .75; }
+    .regra .rodape-regra { margin-top: 8px; font-size: 1.1em; font-weight: 700; }
+    .dica-med { max-width: 980px; margin: 12px auto 0; font-size: .95em; text-align: center; }
+    .acoes-fim { display: flex; justify-content: center; gap: 18px; margin-top: 16px; }
+
+    /* ---------- Tela alta (quiosque 1366×768 a 100%): letras e botões maiores ----------
+       O layout acima é o compacto (cabe em ~614 px de altura); este bloco usa a sobra. */
+    @media (min-height: 700px) {
+      .rodada-topo { margin-bottom: 12px; }
+      .situacao { font-size: 1.06em; padding: 8px 16px; margin-bottom: 14px; }
+      .balao { font-size: 1.08em; }
+      .palco { margin-bottom: 20px; }
+      .btn-resposta { min-height: 112px; font-size: 2.05rem; }
+      body.simples .btn-resposta { min-height: 120px; font-size: 2.2rem; }
+      .balao.compacto { font-size: .86em; }
+      .fb-grade .situacao { font-size: .88em; }
+      #fb-resultado .titulo { font-size: 1.65em; }
+      .fb-tit { margin-top: 6px; }
+      .alerta-lista.fb-sinais li { padding: 4px 0 4px 36px; font-size: 1em; }
+      .fazer, .selo-ia { margin-top: 10px; font-size: 1em; }
+      .fb-acoes { margin-top: 14px; }
+      .fb-acoes .btn { min-height: 72px; }
+      .placar { font-size: 2.9em; }
+      .regra .passos-regra { font-size: 1.8em; }
+    }
+  </style>
+</head>
+<body class="t-perigos">
+  <main class="conteudo">
+
+    <!-- 1. INÍCIO -->
+    <section class="tela ativa" id="tela-inicio">
+      <div class="faixa centro inicio-faixa">
+        <div class="icone-grande">🕵️</div>
+        <h1>Golpe ou seguro?</h1>
+        <p id="inicio-frase">Você vai ver 10 mensagens de celular e decidir: é golpe ou é seguro?</p>
+        <button class="btn destaque grande" id="btn-comecar" type="button">Começar ▶</button>
+      </div>
+      <div class="inicio-exemplo">
+        <span>💬 WhatsApp</span><span>📞 Ligação</span><span>✉️ E-mail</span><span>📢 Anúncio</span><span>🔳 QR Code</span><span>🛒 Loja</span>
+      </div>
+    </section>
+
+    <!-- 2. RODADA -->
+    <section class="tela" id="tela-rodada">
+      <div class="rodada-topo">
+        <h2 id="rodada-titulo">Mensagem 1 de 10</h2>
+        <div class="progresso" id="rodada-progresso"></div>
+        <span id="rodada-ouvir"></span>
+      </div>
+      <div class="situacao oculto" id="rodada-situacao"></div>
+      <div class="palco" id="rodada-palco"></div>
+      <div class="respostas">
+        <button class="btn btn-resposta golpe" id="btn-golpe" type="button"><span class="ico" aria-hidden="true">🚩</span> GOLPE</button>
+        <button class="btn btn-resposta seguro" id="btn-seguro" type="button"><span class="ico" aria-hidden="true">✅</span> SEGURO</button>
+      </div>
+    </section>
+
+    <!-- 3. EXPLICAÇÃO -->
+    <section class="tela" id="tela-feedback">
+      <div class="fb-grade">
+        <div>
+          <p class="rotulo-col">A mensagem</p>
+          <div class="situacao oculto" id="fb-situacao"></div>
+          <div id="fb-palco"></div>
+        </div>
+        <div>
+          <div class="feedback" id="fb-resultado"></div>
+          <p class="fb-tit" id="fb-sinais-tit"></p>
+          <ul class="alerta-lista fb-sinais" id="fb-sinais"></ul>
+          <div class="fazer" id="fb-fazer"></div>
+          <div class="selo-ia oculto" id="fb-ia"></div>
+          <div class="fb-acoes">
+            <span id="fb-ouvir"></span>
+            <button class="btn cor grande" id="btn-proxima" type="button">Próxima ▶</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. RESULTADO -->
+    <section class="tela centro" id="tela-resultado">
+      <p class="placar" id="res-placar"></p>
+      <h2 id="res-titulo" style="margin-bottom:4px"></h2>
+      <p class="faixa-msg" id="res-texto"></p>
+      <div class="regra">
+        <div style="font-weight:800; margin-bottom:6px">A regra que funciona com qualquer golpe:</div>
+        <div class="passos-regra">
+          <span>PRESSA?</span><span class="seta" aria-hidden="true">▶</span>
+          <span>DESLIGA</span><span class="seta" aria-hidden="true">▶</span>
+          <span>LIGA DE VOLTA</span><span class="seta" aria-hidden="true">▶</span>
+          <span>PERGUNTA A PALAVRA</span>
+        </div>
+        <div class="rodape-regra">Senha e código: ninguém pede, ninguém dá.</div>
+      </div>
+      <p class="dica-med" id="res-ia"></p>
+      <p class="dica-med" style="margin-top:4px">Caiu num golpe de Pix? Avise o banco na hora e peça a <strong>contestação no app do banco (MED)</strong>. Depois, faça o <strong>B.O. on-line da Polícia Civil do PR</strong>.</p>
+      <div class="acoes-fim">
+        <button class="btn claro grande" id="btn-de-novo" type="button">↺ Jogar de novo</button>
+        <button class="btn destaque grande" id="btn-continuar" type="button">Continuar ▶</button>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="../shared/config.js"></script>
+  <script src="../shared/util.js"></script>
+  <script src="cenarios.dados.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

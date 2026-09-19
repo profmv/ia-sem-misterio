@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#14161A">
+  <link rel="icon" href="data:,">
+  <title>IA sem Mistério — apresentações e atividades</title>
+  <link rel="stylesheet" href="04-apps/shared/estilo.css">
+  <style>
+    body { margin: 0; }
+    .heroi { background: var(--texto); color: #fff; padding: 28px 0 24px; }
+    .heroi .in { max-width: 860px; margin: 0 auto; padding: 0 16px; }
+    .heroi h1 { font-size: clamp(2rem, 8vw, 3rem); margin: 0 0 6px; line-height: 1.05; }
+    .heroi p { margin: 4px 0 0; font-size: 1.1rem; opacity: .92; }
+    .heroi .grat { display: inline-block; margin-top: 14px; background: var(--destaque); color: var(--texto); font-weight: 800; padding: 6px 14px; border-radius: 999px; font-size: 1rem; opacity: 1; }
+    main { max-width: 860px; margin: 0 auto; padding: 8px 16px 48px; }
+    h2.sec { font-size: 1.35rem; margin: 26px 0 12px; }
+    .topico { background: var(--superficie); border-radius: 18px; border-top: 10px solid var(--cor); box-shadow: var(--sombra); padding: 18px 18px 16px; margin: 0 0 18px; }
+    .topico .num { font-size: .85rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--cor); }
+    .topico h3 { font-size: 1.4rem; margin: 2px 0 4px; line-height: 1.15; }
+    .topico .desc { margin: 0 0 4px; color: var(--texto-suave); font-size: 1.02rem; }
+    .topico .meta { font-size: .9rem; color: var(--texto-suave); margin: 0 0 12px; }
+    .acoes { display: grid; grid-template-columns: 1fr; gap: 10px; }
+    @media (min-width: 620px) { .acoes { grid-template-columns: 1fr 1fr; } }
+    .acoes a { background: var(--cor); color: #fff; text-decoration: none; font-weight: 800; text-align: center; padding: 14px 16px; border-radius: 14px; font-size: 1.05rem; display: block; }
+    .acoes a.sec2 { background: #fff; color: var(--cor); border: 3px solid var(--cor); padding: 11px 16px; }
+    .acoes a small { display: block; font-weight: 500; opacity: .9; font-size: .82rem; margin-top: 2px; }
+    details { margin-top: 12px; border-top: 1px solid var(--borda); padding-top: 10px; }
+    summary { cursor: pointer; font-weight: 800; font-size: 1.05rem; padding: 6px 0; }
+    .frase { font-size: 1.15rem; font-weight: 800; margin: 8px 0; }
+    .regra { background: var(--fundo); border-radius: 12px; padding: 12px 14px; margin: 8px 0; }
+    .regra b { display: block; margin-bottom: 4px; color: var(--cor); }
+    .regra div.l { font-weight: 800; font-size: 1.05rem; }
+    .regra .rod { margin-top: 6px; font-size: .95rem; color: var(--texto-suave); }
+    ul.dicas { margin: 8px 0; padding-left: 20px; } ul.dicas li { margin: 4px 0; }
+    .ferr { display: block; text-decoration: none; color: inherit; border: 2px solid var(--borda); border-radius: 12px; padding: 10px 12px; margin: 8px 0; }
+    .ferr:hover, .ferr:focus-visible { border-color: var(--cor); }
+    .ferr strong { color: var(--link); }
+    .ferr span { display: block; font-size: .92rem; color: var(--texto-suave); }
+    .etq { display: inline-block; font-size: .75rem; font-weight: 800; padding: 2px 8px; border-radius: 999px; background: var(--certo-claro); color: var(--certo); margin-left: 6px; }
+    .aviso { background: #fff8e1; border: 2px solid var(--destaque); border-radius: 14px; padding: 12px 14px; margin: 22px 0 0; font-size: .98rem; }
+    .rodape { margin-top: 30px; font-size: .9rem; color: var(--texto-suave); }
+    .rodape a { color: var(--link); }
+  </style>
+</head>
+<body>
+  <header class="heroi">
+    <div class="in">
+      <h1>🤖 IA sem Mistério</h1>
+      <p id="slogan"></p>
+      <p id="quando"></p>
+      <span class="grat">Grátis · sem cadastro</span>
+    </div>
+  </header>
+
+  <main>
+    <h2 class="sec">Escolha um tópico</h2>
+    <div id="topicos"></div>
+
+    <div class="aviso" id="oferta" hidden></div>
+
+    <p class="rodape">
+      Nos slides: <b>→</b> ou toque avança · <b>←</b> volta · <b>N</b> notas · <b>F</b> tela cheia.<br>
+      <a href="04-apps/portal/index.html">Abrir o portal completo (modo computador)</a>
+    </p>
+  </main>
+
+  <script src="04-apps/shared/config.js"></script>
+  <script src="04-apps/shared/dados-ferramentas.js"></script>
+  <script src="04-apps/portal/dados-trilhas.js"></script>
+  <script src="05-apresentacao/shows.dados.js"></script>
+  <script>
+  (function () {
+    "use strict";
+    var EV = window.EVENTO || {};
+    var P = (window.TRILHAS_PORTAL || {}).trilhas || {};
+    var SHOWS = window.SHOWS || {};
+    var FER = {}; (window.FERRAMENTAS || []).forEach(function (f) { FER[f.id] = f; });
+
+    function el(tag, attrs, filhos) {
+      var n = document.createElement(tag);
+      Object.keys(attrs || {}).forEach(function (k) {
+        if (k === "class") n.className = attrs[k]; else if (k === "text") n.textContent = attrs[k];
+        else if (attrs[k] !== null && attrs[k] !== undefined) n.setAttribute(k, attrs[k]);
+      });
+      [].concat(filhos || []).forEach(function (f) { if (f) n.appendChild(typeof f === "string" ? document.createTextNode(f) : f); });
+      return n;
+    }
+
+    // Trilha ↔ tópico (mesma ordem dos slides) e cor de cada uma
+    var TOPICOS = [
+      { n: 1, trilha: "perigos",       icone: "🛡️", cor: "var(--perigos)" },
+      { n: 2, trilha: "generativa",    icone: "🎨", cor: "var(--generativa)" },
+      { n: 3, trilha: "produtividade", icone: "🚀", cor: "var(--produtividade)" },
+      { n: 4, trilha: "incriveis",     icone: "⭐", cor: "var(--incriveis)" }
+    ];
+
+    document.getElementById("slogan").textContent = EV.slogan || "";
+    document.getElementById("quando").textContent = [EV.data, EV.local].filter(Boolean).join(" · ");
+
+    var raiz = document.getElementById("topicos");
+    TOPICOS.forEach(function (t) {
+      var d = P[t.trilha] || {}, s = SHOWS[String(t.n)] || {}, lev = d.levar || {}, fz = d.fazer || {};
+      var card = el("section", { class: "topico", style: "--cor:" + t.cor });
+      card.appendChild(el("div", { class: "num", text: t.icone + " Tópico " + t.n }));
+      card.appendChild(el("h3", { text: s.titulo || d.titulo || "" }));
+      if (d.descricao) card.appendChild(el("p", { class: "desc", text: d.descricao }));
+      card.appendChild(el("p", { class: "meta", text: "Apresentação de 8 min" + (fz.duracao ? " · atividade de " + fz.duracao : "") }));
+
+      var acoes = el("div", { class: "acoes" }, [
+        el("a", { href: "05-apresentacao/slides.html?show=" + t.n }, ["▶ Ver a apresentação", el("small", { text: "slides — toque para avançar" })]),
+        fz.app ? el("a", { class: "sec2", href: "04-apps/" + fz.app + "/index.html" }, [(fz.emoji || "🎮") + " " + (fz.titulo || "Atividade"), el("small", { text: "atividade prática" + (fz.duracao ? " · " + fz.duracao : "") })]) : null
+      ]);
+      card.appendChild(acoes);
+
+      // Levar para casa
+      var det = el("details", {}, [el("summary", { text: "Levar para casa" })]);
+      if (lev.fraseChave) det.appendChild(el("p", { class: "frase", text: lev.fraseChave }));
+      if (lev.regra) {
+        var r = el("div", { class: "regra" }, [el("b", { text: lev.regra.titulo || "A regra" })]);
+        (lev.regra.linhas || []).forEach(function (l) { r.appendChild(el("div", { class: "l", text: l })); });
+        if (lev.regra.rodape) r.appendChild(el("div", { class: "rod", text: lev.regra.rodape }));
+        det.appendChild(r);
+      }
+      if ((lev.dicas || []).length) det.appendChild(el("ul", { class: "dicas" }, lev.dicas.map(function (x) { return el("li", { text: x }); })));
+      var ferrs = (lev.ferramentas || []).map(function (id) { return FER[id]; }).filter(Boolean);
+      if (ferrs.length) {
+        det.appendChild(el("p", { class: "meta", text: "Para testar em casa, no celular:" }));
+        ferrs.forEach(function (f) {
+          det.appendChild(el("a", { class: "ferr", href: f.url, target: "_blank", rel: "noopener noreferrer" }, [
+            el("strong", {}, [f.nome, f.login === "nao" ? el("span", { class: "etq", text: "sem cadastro" }) : null]),
+            el("span", { text: f.descricao || "" })
+          ]));
+        });
+      }
+      card.appendChild(det);
+      raiz.appendChild(card);
+    });
+
+    var of = EV.oferta || {};
+    var partes = [of.titulo, of.texto].filter(Boolean);
+    if (partes.length) {
+      var caixa = document.getElementById("oferta");
+      caixa.appendChild(el("b", { text: partes[0] }));
+      if (partes[1]) caixa.appendChild(el("div", { text: partes[1] }));
+      if (of.aulaGratuita && !/A DEFINIR/i.test(of.aulaGratuita)) caixa.appendChild(el("div", { text: of.aulaGratuita }));
+      caixa.hidden = false;
+    }
+  })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Monte seu pedido — IA sem Mistério</title>
+  <link rel="stylesheet" href="../shared/estilo.css">
+  <style>
+    main.conteudo { padding-top: 14px; padding-bottom: 14px; }
+    .balao {
+      background: var(--superficie); border: 3px solid var(--cor); border-radius: 22px; padding: 14px 22px;
+      font-size: 1.45rem; font-weight: 700; min-height: 2.6em; position: relative; margin-bottom: 14px;
+    }
+    .balao::before { content: "✍️ Seu pedido para a IA:"; display: block; font-size: .8rem; font-weight: 800; color: var(--cor); text-transform: uppercase; letter-spacing: .06em; }
+    .balao .vazio { color: var(--texto-suave); font-weight: 400; }
+    .balao .parte { border-radius: 8px; padding: 0 4px; }
+    .balao .p-estilo  { background: #FFE9B3; }
+    .balao .p-assunto { background: #D9F2E3; }
+    .balao .p-lugar   { background: #DCE8FB; }
+
+    .opcoes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+    .opcao {
+      font: inherit; cursor: pointer; background: var(--superficie); color: var(--texto);
+      border: 4px solid var(--borda); border-radius: var(--raio); padding: 22px 12px; text-align: center;
+      display: flex; flex-direction: column; align-items: center; gap: 8px; min-height: 190px; justify-content: center;
+      transition: transform .1s, border-color .1s;
+    }
+    .opcao:hover { border-color: var(--cor); transform: translateY(-3px); }
+    .opcao .icone { font-size: 4.2rem; line-height: 1; }
+    .opcao .rotulo { font-size: 1.35rem; font-weight: 800; }
+
+    .resultado { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 24px; align-items: center; }
+    .resultado img, .falta-img { width: 100%; max-height: 58vh; aspect-ratio: 1; object-fit: cover; border-radius: 22px; box-shadow: var(--sombra); background: #fff; }
+    .falta-img { display: flex; align-items: center; justify-content: center; text-align: center; padding: 20px; border: 4px dashed var(--borda); color: var(--texto-suave); font-size: 1rem; box-shadow: none; }
+    .gerando { text-align: center; padding: 60px 0; }
+    .gerando .emoji { font-size: 5rem; display: inline-block; animation: girar 1.2s linear infinite; }
+    @keyframes girar { to { transform: rotate(360deg); } }
+
+    .comparar { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+    .comparar figure { margin: 0; text-align: center; }
+    .comparar img, .comparar .falta-img { max-height: 40vh; }
+    .comparar figcaption { font-weight: 800; margin-top: 6px; font-size: 1.1rem; }
+    .comparar figure.escolhida img { outline: 6px solid var(--destaque); }
+
+    @media (max-width: 900px) { .opcoes, .comparar, .resultado { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body class="t-generativa">
+  <main class="conteudo">
+
+    <!-- INÍCIO -->
+    <section class="tela ativa" id="tela-inicio">
+      <div class="faixa centro" style="padding: 44px 24px;">
+        <div style="font-size: 5rem; line-height: 1">🎨</div>
+        <h1>Monte seu pedido de imagem</h1>
+        <p style="font-size: 1.4rem; max-width: 760px; margin: 0 auto 26px;">
+          A IA desenha o que você <strong>descreve com palavras</strong>. Escolha 3 coisas e veja o que ela criou.
+        </p>
+        <button class="btn destaque grande" id="btn-comecar" type="button">Começar ▶</button>
+      </div>
+      <p class="centro" style="margin-top: 14px; color: var(--texto-suave)">Leva uns 3 minutos · funciona sem internet</p>
+    </section>
+
+    <!-- ESCOLHAS -->
+    <section class="tela" id="tela-escolha">
+      <div class="balao" id="balao"></div>
+      <div class="progresso" id="progresso"></div>
+      <h2 id="pergunta"></h2>
+      <div class="opcoes" id="opcoes"></div>
+      <div class="linha" style="justify-content: space-between; margin-top: 16px;">
+        <button class="btn claro" id="btn-voltar" type="button">← Voltar</button>
+      </div>
+    </section>
+
+    <!-- RESULTADO -->
+    <section class="tela" id="tela-resultado">
+      <div class="gerando" id="gerando">
+        <span class="emoji">🎨</span>
+        <h2>A IA está desenhando…</h2>
+      </div>
+      <div id="resultado" class="oculto">
+        <div class="resultado">
+          <div id="imagem-resultado"></div>
+          <div>
+            <div class="balao" id="balao-final"></div>
+            <p style="font-size: 1.2rem;">Uma IA fez essa imagem em segundos, só lendo o seu pedido. <strong>Ninguém desenhou.</strong></p>
+            <div class="linha">
+              <button class="btn cor grande" id="btn-comparar" type="button">Ver em outros estilos ▶</button>
+              <button class="btn claro" id="btn-outro" type="button">↺ Montar outro</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- COMPARAR ESTILOS -->
+    <section class="tela" id="tela-comparar">
+      <h2 id="titulo-comparar">Mesmo pedido, 3 estilos</h2>
+      <div class="comparar" id="comparar"></div>
+      <div class="feedback certo" style="margin-top: 16px;">
+        <div class="titulo">💡 Mudou uma palavra, mudou a imagem</div>
+        <p style="margin:0">A IA não adivinha o que você imaginou. Diga <strong>o quê</strong>, <strong>que estilo</strong>, <strong>onde</strong> e <strong>detalhes</strong> (luz, cores, ângulo).</p>
+      </div>
+      <div class="linha" style="justify-content: space-between; margin-top: 16px;">
+        <button class="btn claro" id="btn-voltar-resultado" type="button">← Voltar</button>
+        <button class="btn destaque grande" id="btn-ir-celular" type="button">Fazer de verdade ▶</button>
+      </div>
+    </section>
+
+    <!-- NO CELULAR + FIM -->
+    <section class="tela" id="tela-celular">
+      <h2>Agora é com você, no seu celular 📱</h2>
+      <div class="grade g2" style="align-items: start;">
+        <div>
+          <div class="balao" id="balao-celular"></div>
+          <ul class="alerta-lista dicas">
+            <li>Digite o pedido do seu jeito. Pode inventar!</li>
+            <li>Não gostou? Peça: “mais colorido”, “de noite”, “estilo desenho”.</li>
+          </ul>
+          <ul class="alerta-lista">
+            <li>Não envie foto de outras pessoas nem de crianças.</li>
+            <li>A mesma tecnologia faz foto falsa para golpe. Foto não é prova.</li>
+          </ul>
+        </div>
+        <div class="grade" id="qrs" style="gap: 12px;"></div>
+      </div>
+      <div class="linha" style="justify-content: space-between; margin-top: 16px;">
+        <button class="btn claro" id="btn-voltar-comparar" type="button">← Voltar</button>
+        <button class="btn destaque grande" id="btn-continuar" type="button">Continuar ▶</button>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="../shared/config.js"></script>
+  <script src="../shared/qrcode.js"></script>
+  <script src="../shared/util.js"></script>
+  <script src="../shared/dados-ferramentas.js"></script>
+  <script src="img/imagens.dados.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>IA sem Mistério — Portal</title>
+  <link rel="stylesheet" href="../shared/estilo.css">
+  <style>
+    /* ----- Ocioso (atração) ----- */
+    /* padding: a cartela fica entre a faixa do ?reservado=1 (em cima) e o "Toque..." (embaixo) */
+    #tela-ocioso { position: fixed; inset: 0; z-index: 60; background: #14161A; color: #fff; cursor: pointer; padding: 13vh 0 11vh; }
+    #tela-ocioso.ativa { display: flex; }
+    .ocioso-palco { margin: auto; text-align: center; padding: 1vh 6vw; max-width: 1400px; }
+    .ocioso-icone { font-size: 9rem; line-height: 1; }
+    .ocioso-img { max-height: 44vh; border-radius: 24px; box-shadow: 0 20px 60px rgba(0,0,0,.5); }
+    .ocioso-titulo { font-size: 4.4rem; font-weight: 800; line-height: 1.05; margin: 3vh 0 2vh; letter-spacing: -.02em; }
+    .ocioso-palco.longo .ocioso-titulo { font-size: 3.4rem; }
+    .ocioso-texto { font-size: 2rem; opacity: .9; }
+    .ocioso-toque { position: fixed; left: 0; right: 0; bottom: 4vh; text-align: center; font-size: 1.8rem; font-weight: 800; color: var(--destaque); animation: pulsar 1.6s ease-in-out infinite; }
+    .ocioso-reservado { position: fixed; top: 3vh; left: 0; right: 0; text-align: center; font-size: 1.6rem; font-weight: 800; background: var(--destaque); color: var(--texto); padding: 10px; }
+    @keyframes pulsar { 50% { opacity: .45; } }
+
+    /* ----- Início ----- */
+    /* Cabe em 1366×768 mesmo com o aviso de show e no modo "Letras maiores" */
+    .boas-vindas { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+    .boas-vindas h1 { font-size: 2.6rem; margin: 0; }
+    .aviso-show { display: flex; gap: 14px; align-items: center; padding: 8px 20px; margin-bottom: 12px; background: var(--destaque); border-radius: var(--raio); font-size: 1.1rem; font-weight: 700; line-height: 1.3; }
+    .aviso-show .grande { font-size: 1.8rem; }
+    #portas { gap: 16px; }
+    .porta { text-align: left; font: inherit; color: inherit; display: grid; grid-template-columns: auto 1fr; gap: 16px; align-items: center; padding: 14px 24px; }
+    .porta .icone { font-size: 3.2rem; margin: 0; }
+    .porta h2 { color: var(--cor); margin: 0 0 4px; font-size: 1.6rem; }
+    .porta p { margin: 0; font-size: 1.05rem; color: var(--texto-suave); }
+    .porta .feito { font-weight: 800; color: var(--cor); }
+    body.simples .porta h2 { font-size: 1.75rem; }
+    body.simples .porta p { font-size: 1.15rem; line-height: 1.35; }
+    body.simples #portas { gap: 12px; }
+    body.simples .boas-vindas .btn { min-height: 64px; padding-top: 10px; padding-bottom: 10px; }
+    body.simples #btn-me-escolhe { min-height: 84px; padding-top: 12px; padding-bottom: 12px; }
+
+    /* Etiquetas ("⏱ 10 min", "Ver 1 de 3") com 18 px, legíveis para idosos */
+    #tela-inicio .etiqueta, #tela-trilha .etiqueta { font-size: .9rem; }
+
+    /* ----- Trilha ----- */
+    .passos-nav { display: flex; gap: 10px; margin: 8px 0 12px; }
+    .passos-nav span { flex: 1; text-align: center; padding: 6px; border-radius: 14px; font-weight: 800; border: 3px solid var(--borda); color: var(--texto-suave); background: var(--superficie); }
+    #tela-trilha .cartao { padding: 18px 24px; }
+    .topo { padding-top: 8px; padding-bottom: 8px; }
+    .passos-nav span.atual { border-color: var(--cor); color: #fff; background: var(--cor); }
+    .passos-nav span.feito { border-color: var(--cor); color: var(--cor); }
+
+    /* Tudo precisa caber em 1366×768 sem rolar */
+    #tela-trilha h1 { font-size: 2rem; }
+    .cartela { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px; align-items: center; }
+    .cartela.so-texto { grid-template-columns: 1fr; text-align: center; }
+    .cartela > * { min-width: 0; }
+    .cartela h2 { font-size: 2rem; margin-bottom: .3em; }
+    .cartela .contador { margin-bottom: 8px; }
+    .cartela .texto { font-size: 1.25rem; }
+    .cartela .nota { white-space: normal; margin: 10px 0 0; font-size: .9rem; border-radius: 14px; padding: 4px 14px; }
+    .cartela .visual img { width: 100%; max-height: 46vh; object-fit: contain; border-radius: 18px; background: #fff; }
+    .cartela .visual video { max-height: 50vh !important; } /* util.js põe 60vh inline; vídeo em pé não pode empurrar a navegação */
+    .galeria { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+    .galeria > * { min-width: 0; }
+    .cartela .visual .galeria img { width: 100%; aspect-ratio: 1; max-height: 21vh; object-fit: cover; border-radius: 12px; }
+    .galeria .emoji-grande { font-size: 3rem; padding: 20px 0; background: var(--fundo); border-radius: 12px; }
+    .revelar { margin-top: 10px; }
+    .revelar .feedback { margin: 0; padding: 10px 18px 12px; }
+    .revelar .feedback .titulo { font-size: 1.3rem; margin-bottom: 4px; }
+    .revelar .feedback p { margin: 0; font-size: 1.05rem; line-height: 1.4; }
+    body.simples .revelar .feedback p { font-size: 1.15rem; }
+    .emoji-grande { font-size: 7rem; text-align: center; line-height: 1; }
+    .transcricao { background: var(--fundo); border-left: 6px solid var(--cor); padding: 12px 16px; border-radius: 10px; font-size: 1.15rem; font-style: italic; margin-top: 10px; }
+    .com-audio .emoji-grande { font-size: 5rem; }
+    .cartela .visual .midia .feedback { margin: 10px 0 0; padding: 10px 18px; }
+    .cartela .visual .midia .feedback .titulo { font-size: 1.25rem; margin-bottom: 4px; }
+
+    /* VER com "comparar": título numa faixa e os dois lados lado a lado, na largura toda */
+    .cartela.cartela-comparar { grid-template-columns: minmax(0, 1fr); align-items: stretch; gap: 14px; }
+    .cartela-comparar .col-texto { display: grid; grid-template-columns: auto minmax(0, 1fr); grid-template-areas: "contador texto" "titulo texto"; column-gap: 32px; align-items: end; }
+    .cartela-comparar .contador { grid-area: contador; justify-self: start; }
+    .cartela-comparar h2 { grid-area: titulo; margin: 0; }
+    .cartela-comparar .texto { grid-area: texto; align-self: center; }
+    .cartela-comparar .col-texto > :nth-child(n+4) { grid-column: 1 / -1; }
+    .comparar { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+    .comparar .lado { margin: 0; padding: 12px 18px; }
+    .comparar .lado.com-imagem { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 14px; align-items: center; }
+    .comparar .lado .titulo { font-size: 1.3rem; margin-bottom: 6px; }
+    .comparar .lado p { margin: 0; font-size: 1.05rem; line-height: 1.4; }
+    .comparar .lado .lado-pedido { font-weight: 700; }
+    .comparar .lado .lado-resultado { font-style: italic; margin-top: 8px; }
+    .cartela .visual .comparar img { width: 240px; height: 240px; max-height: none; object-fit: cover; border-radius: 12px; }
+    .comparar .emoji-grande { width: 240px; font-size: 4rem; }
+
+    .navegacao { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 12px; }
+    .navegacao .btn.grande { min-height: 68px; }
+    body.simples .cartela + .navegacao .btn.grande { min-height: 80px; padding-top: 12px; padding-bottom: 12px; }
+    main.conteudo { padding-top: 12px; padding-bottom: 12px; }
+
+    .fazer { text-align: center; padding: 6px 20px 0; }
+    .fazer .emoji-grande { font-size: 4.5rem; }
+    #trilha-corpo .fazer h2 { font-size: 2.6rem; margin: 8px 0 10px; }
+    .fazer-texto { font-size: 1.4rem; max-width: 820px; margin: 0 auto 20px; }
+    .fazer .btn { min-width: 360px; }
+    body.simples .fazer .btn.grande { min-height: 80px; padding-top: 12px; padding-bottom: 12px; }
+    body.simples .fazer .emoji-grande { font-size: 3.8rem; }
+    .fazer-duracao { margin: 12px 0 0; color: var(--texto-suave); }
+
+    /* ----- LEVAR: tudo (inclusive a navegação) cabe em 1366×768 sem rolar ----- */
+    #tela-trilha #trilha-corpo.etapa-levar { padding: 12px 18px; }
+    .etapa-levar .navegacao { margin-top: 10px; }
+    .etapa-levar .navegacao .btn { min-height: 60px; padding-top: 6px; padding-bottom: 6px; }
+    .etapa-levar .navegacao .btn.grande { min-height: 64px; }
+    .levar-grade { display: grid; grid-template-columns: minmax(0, 1.08fr) minmax(0, 1fr); gap: 14px; align-items: start; }
+    @media (max-width: 1000px) { .levar-grade { grid-template-columns: 1fr; } }
+    .levar-col { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+    .levar-grade .rotulo { font-size: .9rem; font-weight: 700; line-height: 1.3; }
+    .levar-grade .faixa { padding: 8px 20px 10px; }
+    .levar-grade .faixa .rotulo { opacity: .9; }
+    .frase-chave { font-size: 1.55rem; font-weight: 800; line-height: 1.15; }
+    .regra { background: var(--superficie); border: 2px solid var(--borda); border-radius: var(--raio); padding: 6px 18px 8px; }
+    .regra-titulo { font-size: .9rem; font-weight: 800; color: var(--cor); text-transform: uppercase; letter-spacing: .06em; }
+    .regra-linhas { display: flex; flex-wrap: wrap; gap: 6px; margin: 3px 0 5px; }
+    .regra-linhas span { font-size: 1.3rem; font-weight: 800; line-height: 1.2; padding: 1px 12px; border-radius: 10px; background: var(--cor-clara); }
+    .regra-rodape { font-size: .9rem; font-weight: 700; line-height: 1.3; }
+    .levar-grade .dicas li { font-size: .95rem; line-height: 1.3; padding: 3px 0 3px 40px; }
+    .levar-grade .dicas li::before { top: 1px; font-size: 1.1rem; }
+    .palavra-trilha { text-align: center; border: 4px dashed var(--cor); border-radius: var(--raio); padding: 4px 12px 6px; background: var(--cor-clara); }
+    .palavra-trilha .palavra { font-size: 3rem; font-weight: 800; letter-spacing: .12em; color: var(--cor); line-height: 1.05; }
+    .qrs-bloco { display: flex; flex-direction: column; gap: 4px; }
+    .qrs { display: grid; gap: 6px; }
+    .qrs .qr-celular { gap: 12px; padding: 6px 8px 6px 6px; line-height: 1.25; }
+    .qrs .qr-celular .qr { padding: 0 !important; }
+    .qrs .qr-celular > div:last-child > div:first-child { font-size: 1rem !important; }
+    .qrs .qr-celular .resumo { font-size: .9rem; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+    .qrs .qr-celular .url { font-size: .9rem; margin-top: 2px; }
+    .qrs .qr-celular .etiquetas { margin-top: 4px; }
+    .qrs .qr-celular .etiqueta { font-size: .9rem; padding: 0 10px; }
+    .qrs .qr-celular .etiqueta.internet { display: none; } /* já dito no título do bloco */
+
+    .tchau { text-align: center; padding: 8vh 4vw; }
+    .tchau .emoji-grande { font-size: 7rem; }
+  </style>
+</head>
+<body>
+  <!-- OCIOSO: tela de atração quando ninguém está usando -->
+  <section class="tela" id="tela-ocioso" aria-label="Toque para começar">
+    <div class="ocioso-reservado oculto" id="ocioso-reservado">Este computador abre quando a carreta encher — enquanto isso, assista ao tópico!</div>
+    <div class="ocioso-palco" id="ocioso-palco"></div>
+    <div class="ocioso-toque">👆 Toque ou clique em qualquer lugar para começar</div>
+  </section>
+
+  <main class="conteudo">
+
+    <!-- INÍCIO -->
+    <section class="tela" id="tela-inicio">
+      <div class="boas-vindas">
+        <h1>O que você quer hoje?</h1>
+        <div class="linha">
+          <button class="btn claro" id="btn-ouvir-inicio" type="button">🔊 Ouvir</button>
+          <button class="btn claro" id="btn-simples" type="button">🔍 Letras maiores</button>
+        </div>
+      </div>
+      <div class="aviso-show oculto" id="aviso-show"><span class="grande">🎤</span><span id="aviso-show-texto"></span></div>
+      <div class="grade g2" id="portas"></div>
+      <div class="centro" style="margin-top: 14px;">
+        <button class="btn destaque grande" id="btn-me-escolhe" type="button">🤷 Não sei, me escolhe</button>
+      </div>
+    </section>
+
+    <!-- TRILHA -->
+    <section class="tela" id="tela-trilha">
+      <div class="linha" style="justify-content: space-between;">
+        <h1 id="trilha-titulo" style="margin:0; color: var(--cor)"></h1>
+        <span class="etiqueta" id="trilha-duracao"></span>
+      </div>
+      <div class="passos-nav" id="passos-nav"></div>
+      <article class="cartao" id="trilha-corpo"></article>
+    </section>
+
+    <!-- TCHAU -->
+    <section class="tela" id="tela-tchau">
+      <div class="tchau">
+        <div class="emoji-grande">🙌</div>
+        <h1>Valeu pela visita!</h1>
+        <p style="font-size: 1.5rem;">Pegue seu cartão na saída e escreva as palavras das trilhas que você fez.</p>
+        <p id="tchau-show" style="font-size: 1.3rem; font-weight: 700;"></p>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="../shared/config.js"></script>
+  <script src="../shared/qrcode.js"></script>
+  <script src="../shared/util.js"></script>
+  <script src="../shared/dados-ferramentas.js"></script>
+  <script src="dados-trilhas.js"></script>
+  <script src="portal.js"></script>
+</body>
+</html>

@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tela de atração — IA sem Mistério</title>
+  <!--
+    Loop para a TV ou para o monitor virado para a porta (P1 "vitrine").
+    Parâmetros:
+      ?reservado=1  faixa "Este computador abre quando encher"
+      ?som=1        toca midia/voz-clonada-neutra.mp3 a cada 3 minutos (só se o PC tiver caixa própria;
+                    o atalho ABRIR-vitrine.bat já libera o som automático no Chrome)
+    Os textos das cartelas vêm de 04-apps/portal/dados-trilhas.js (campo "ocioso").
+  -->
+  <style>
+    html, body { margin: 0; height: 100%; background: #101216; color: #fff; overflow: hidden; cursor: none;
+      font-family: "Segoe UI", system-ui, Arial, sans-serif; }
+    .faixa-cor { position: fixed; top: 0; left: 0; right: 0; height: 1.6vh; background: #F2B705; transition: background .6s; }
+    .palco { position: fixed; inset: 5vh 6vw 12vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; animation: entrar .6s ease-out; }
+    @keyframes entrar { from { opacity: 0; transform: scale(.97); } to { opacity: 1; transform: none; } }
+    .icone { font-size: 22vh; line-height: 1; }
+    .img { max-height: 46vh; max-width: 70vw; border-radius: 3vh; box-shadow: 0 3vh 8vh rgba(0,0,0,.6); }
+    .selo { display: inline-block; margin-top: -3vh; background: #B3261E; color: #fff; font-weight: 800; font-size: 3.2vh; padding: 1vh 2.4vw; border-radius: 99px; transform: rotate(-3deg); }
+    .titulo { font-size: 8.5vh; font-weight: 800; line-height: 1.05; margin: 4vh 0 2vh; letter-spacing: -.02em; max-width: 88vw; }
+    .texto { font-size: 4.6vh; opacity: .92; max-width: 80vw; }
+    .agenda { font-size: 5vh; line-height: 1.5; text-align: left; margin-top: 2vh; }
+    .agenda .hora { color: #F2B705; font-weight: 800; display: inline-block; min-width: 8ch; }
+    .agenda .passou { opacity: .35; text-decoration: line-through; }
+    .qr-box { background: #fff; padding: 2vh; border-radius: 2vh; line-height: 0; margin-top: 2vh; }
+    .qr-box svg { width: 34vh; height: 34vh; }
+    .url { font-size: 4vh; font-weight: 800; color: #F2B705; margin-top: 2vh; }
+    .rodape { position: fixed; left: 0; right: 0; bottom: 3vh; text-align: center; font-size: 3.4vh; font-weight: 700; }
+    .rodape .grande { color: #F2B705; }
+    .reservado { position: fixed; top: 3vh; left: 0; right: 0; text-align: center; background: #F2B705; color: #101216; font-weight: 800; font-size: 3.6vh; padding: 1.2vh; }
+  </style>
+</head>
+<body>
+  <div class="faixa-cor" id="faixa"></div>
+  <div class="reservado" id="reservado" hidden>Este computador abre quando a carreta encher — enquanto isso, assista ao tópico!</div>
+  <div class="palco" id="palco"></div>
+  <div class="rodape" id="rodape"></div>
+
+  <script src="../04-apps/shared/config.js"></script>
+  <script src="../04-apps/shared/qrcode.js"></script>
+  <script src="../04-apps/shared/util.js"></script>
+  <script src="../04-apps/portal/dados-trilhas.js"></script>
+  <script>
+  (function () {
+    "use strict";
+    var EV = IA.EVENTO, el = IA.el, palco = document.getElementById("palco");
+    var base = (window.TRILHAS_PORTAL && window.TRILHAS_PORTAL.ocioso) || [];
+    var cores = ["#F2B705", "#B3261E", "#6230C9", "#0D5FC7", "#0B7A4B"];
+
+    // Caminhos das cartelas do portal são relativos a 04-apps/portal/: ajustar para esta pasta
+    function caminho(src) { return src ? src.replace("../../05-apresentacao/", "") : src; }
+
+    var cartelas = base.map(function (c) { return Object.assign({}, c, { imagem: caminho(c.imagem) }); });
+    cartelas.splice(2, 0, { agenda: true });
+    if (EV.marca && EV.marca.linkMateriais) cartelas.push({ qr: true });
+
+    if (IA.parametro("reservado") === "1") document.getElementById("reservado").hidden = false;
+
+    function minutos(h) { var p = h.split(":"); return (+p[0]) * 60 + (+p[1]); }
+
+    function desenhar(c) {
+      palco.innerHTML = "";
+      palco.style.animation = "none"; void palco.offsetWidth; palco.style.animation = "";
+
+      if (c.agenda) {
+        var agora = new Date(), min = agora.getHours() * 60 + agora.getMinutes();
+        palco.appendChild(el("div", { class: "titulo" }, ["🎤 Tópicos de 8 minutos, aqui dentro"]));
+        palco.appendChild(el("div", { class: "agenda" }, (EV.shows || []).map(function (s) {
+          return el("div", { class: minutos(s.hora) + 8 < min ? "passou" : "" }, [el("span", { class: "hora" }, [s.hora]), s.titulo]);
+        })));
+        return true;
+      }
+      if (c.qr) {
+        var q = IA.qr(EV.marca.linkMateriais, 400);
+        palco.appendChild(el("div", { class: "titulo", style: "font-size:7vh" }, [(EV.oferta && EV.oferta.titulo) || "Leve o material"]));
+        palco.appendChild(el("div", { class: "texto" }, [(EV.oferta && EV.oferta.texto) || ""]));
+        if (q) palco.appendChild(el("div", { class: "qr-box" }, [q.firstChild]));
+        palco.appendChild(el("div", { class: "url" }, [IA.urlCurta(EV.marca.linkMateriais)]));
+        return true;
+      }
+      var titulo = c.titulo;
+      if (c.proximoShow) {
+        var s = IA.proximoShow();
+        if (!s) return false;
+        titulo = s.faltam <= 0 ? "Tópico AGORA: " + s.titulo : "Próximo tópico às " + s.hora;
+      }
+      if (c.imagem) {
+        var img = el("img", { class: "img", src: c.imagem, alt: "" });
+        img.onerror = function () { img.replaceWith(el("div", { class: "icone" }, [c.icone || "🤖"])); };
+        palco.appendChild(img);
+        if (/não existe/i.test(c.titulo || "")) palco.appendChild(el("div", { class: "selo" }, ["GERADO POR IA"]));
+      } else {
+        palco.appendChild(el("div", { class: "icone" }, [c.icone || "✨"]));
+      }
+      palco.appendChild(el("div", { class: "titulo" }, [titulo]));
+      if (c.texto) palco.appendChild(el("div", { class: "texto" }, [c.texto]));
+      return true;
+    }
+
+    var i = 0;
+    function girar() {
+      for (var n = 0; n < cartelas.length; n++) {
+        var c = cartelas[i % cartelas.length];
+        document.getElementById("faixa").style.background = cores[i % cores.length];
+        i++;
+        if (desenhar(c)) break;
+      }
+      var s = IA.proximoShow();
+      document.getElementById("rodape").innerHTML = "";
+      document.getElementById("rodape").appendChild(el("div", {}, [
+        el("span", { class: "grande" }, ["GRÁTIS · ENTRE"]), "  ·  " + (EV.nomeOficina || "") +
+        (s && s.faltam > 0 ? "  ·  próximo tópico " + s.hora : "")
+      ]));
+    }
+    girar();
+    setInterval(girar, 8000);
+
+    // Som opcional a cada 3 minutos
+    if (IA.parametro("som") === "1") {
+      var audio = new Audio("midia/voz-clonada-neutra.mp3");
+      setInterval(function () { try { audio.currentTime = 0; audio.play(); } catch (e) {} }, 180000);
+    }
+
+    // Recarrega a cada 30 min por segurança (memória, relógio)
+    setTimeout(function () { location.reload(); }, 30 * 60000);
+  })();
+  </script>
+</body>
+</html>

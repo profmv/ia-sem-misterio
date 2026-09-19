@@ -1,0 +1,290 @@
+/* =====================================================================
+   IA sem Mistério — sistema visual compartilhado
+   Regras: legível sob luz forte e para idosos, toque fácil, sem internet.
+   ===================================================================== */
+
+:root {
+  /* Base clara de alto contraste */
+  --fundo: #F6F4EF;
+  --superficie: #FFFFFF;
+  --texto: #14161A;
+  --texto-suave: #4A4F57;
+  --borda: #D9D5CC;
+  --sombra: 0 4px 18px rgba(20, 22, 26, .10);
+
+  /* Cores das trilhas (todas com texto branco em contraste AA)
+     Não caia em golpe = vermelho · Crie algo = roxo · Trabalhe melhor = azul · Veja o impossível = verde */
+  --perigos: #B3261E;
+  --perigos-claro: #FDE8E6;
+  --generativa: #6230C9;
+  --generativa-claro: #EEE6FD;
+  --produtividade: #0D5FC7;
+  --produtividade-claro: #E3EEFC;
+  --incriveis: #0B7A4B;
+  --incriveis-claro: #E2F5EC;
+
+  --destaque: #F2B705;      /* amarelo de chamada */
+  --certo: #0B7A4B;
+  --certo-claro: #E2F5EC;
+  --errado: #B3261E;
+  --errado-claro: #FDE8E6;
+  --link: #0D5FC7;
+
+  --raio: 18px;
+  --raio-peq: 10px;
+  --espaco: 24px;
+
+  --fonte: "Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+html { font-size: 20px; }
+@media (min-width: 1600px) { html { font-size: 22px; } }
+@media (max-width: 900px)  { html { font-size: 18px; } }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: var(--fonte);
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--texto);
+  background: var(--fundo);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3 { line-height: 1.15; margin: 0 0 .5em; }
+h1 { font-size: 2.4rem; font-weight: 800; letter-spacing: -.02em; }
+h2 { font-size: 1.7rem; font-weight: 800; }
+h3 { font-size: 1.25rem; font-weight: 700; }
+p  { margin: 0 0 1em; }
+a  { color: var(--link); }
+strong { font-weight: 700; }
+
+img { max-width: 100%; }
+
+/* ---------- Estrutura ---------- */
+
+.topo {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px var(--espaco);
+  background: var(--texto);
+  color: #fff;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+.topo .marca { font-weight: 800; font-size: 1.1rem; }
+.topo .marca small { display: block; font-weight: 400; font-size: .75rem; opacity: .8; }
+.topo .espaco { flex: 1; }
+.topo .btn { min-height: 48px; padding: 8px 18px; font-size: .9rem; }
+
+.conteudo {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--espaco);
+}
+.conteudo.estreito { max-width: 860px; }
+
+.tela { display: none; animation: surgir .25s ease-out; }
+.tela.ativa { display: block; }
+@keyframes surgir { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+.grade { display: grid; gap: var(--espaco); }
+.grade.g2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.grade.g3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.grade.g4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+@media (max-width: 1000px) { .grade.g3, .grade.g4 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 640px)  { .grade.g2, .grade.g3, .grade.g4 { grid-template-columns: 1fr; } }
+
+.linha { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.centro { text-align: center; }
+.oculto { display: none !important; }
+
+/* ---------- Cartões ---------- */
+
+.cartao {
+  background: var(--superficie);
+  border: 2px solid var(--borda);
+  border-radius: var(--raio);
+  padding: var(--espaco);
+  box-shadow: var(--sombra);
+}
+.cartao.clicavel { cursor: pointer; transition: transform .12s, box-shadow .12s; }
+.cartao.clicavel:hover, .cartao.clicavel:focus-visible { transform: translateY(-3px); box-shadow: 0 10px 28px rgba(20,22,26,.16); }
+
+.cartao.trilha { border-width: 0; border-top: 10px solid var(--cor, var(--texto)); }
+.cartao .icone { font-size: 3rem; line-height: 1; margin-bottom: 12px; }
+
+/* Cores por trilha: aplique a classe no elemento pai */
+.t-perigos       { --cor: var(--perigos);       --cor-clara: var(--perigos-claro); }
+.t-generativa    { --cor: var(--generativa);    --cor-clara: var(--generativa-claro); }
+.t-produtividade { --cor: var(--produtividade); --cor-clara: var(--produtividade-claro); }
+.t-incriveis     { --cor: var(--incriveis);     --cor-clara: var(--incriveis-claro); }
+
+.faixa {
+  background: var(--cor, var(--texto));
+  color: #fff;
+  border-radius: var(--raio);
+  padding: calc(var(--espaco) * 1.2) var(--espaco);
+}
+.faixa h1, .faixa h2 { color: #fff; }
+
+/* ---------- Botões ---------- */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 60px;
+  min-width: 80px;
+  padding: 12px 28px;
+  border: 3px solid transparent;
+  border-radius: 999px;
+  font: inherit;
+  font-weight: 700;
+  font-size: 1.05rem;
+  text-decoration: none;
+  cursor: pointer;
+  background: var(--texto);
+  color: #fff;
+  transition: transform .08s, filter .12s;
+  user-select: none;
+}
+.btn:hover { filter: brightness(1.12); }
+.btn:active { transform: scale(.97); }
+.btn:focus-visible { outline: 4px solid var(--destaque); outline-offset: 3px; }
+.btn[disabled] { opacity: .45; cursor: not-allowed; }
+
+.btn.cor       { background: var(--cor, var(--texto)); }
+.btn.claro     { background: var(--superficie); color: var(--texto); border-color: var(--texto); }
+.btn.destaque  { background: var(--destaque); color: var(--texto); }
+.btn.certo     { background: var(--certo); }
+.btn.errado    { background: var(--errado); }
+.btn.grande    { min-height: 80px; font-size: 1.4rem; padding: 16px 40px; }
+.btn.bloco     { display: flex; width: 100%; }
+
+/* ---------- Etiquetas ---------- */
+
+.etiqueta {
+  display: inline-block;
+  padding: 3px 12px;
+  border-radius: 999px;
+  font-size: .75rem;
+  font-weight: 700;
+  background: var(--fundo);
+  border: 2px solid var(--borda);
+  color: var(--texto-suave);
+  white-space: nowrap;
+}
+.etiqueta.internet { border-color: var(--link); color: var(--link); }
+.etiqueta.login    { border-color: var(--errado); color: var(--errado); }
+.etiqueta.ok       { border-color: var(--certo); color: var(--certo); }
+
+/* ---------- Progresso ---------- */
+
+.progresso { display: flex; gap: 8px; margin: 12px 0 20px; }
+.progresso span { flex: 1; height: 10px; border-radius: 999px; background: var(--borda); }
+.progresso span.feito { background: var(--cor, var(--texto)); }
+
+/* ---------- Feedback ---------- */
+
+.feedback {
+  border-radius: var(--raio);
+  padding: var(--espaco);
+  border: 3px solid;
+  margin: 16px 0;
+}
+.feedback.certo  { border-color: var(--certo);  background: var(--certo-claro); }
+.feedback.errado { border-color: var(--errado); background: var(--errado-claro); }
+.feedback .titulo { font-size: 1.5rem; font-weight: 800; margin-bottom: 8px; }
+
+.alerta-lista { list-style: none; padding: 0; margin: 0; }
+.alerta-lista li { padding: 10px 0 10px 44px; position: relative; border-bottom: 1px dashed var(--borda); }
+.alerta-lista li::before { content: "🚩"; position: absolute; left: 4px; top: 8px; font-size: 1.3rem; }
+.alerta-lista.dicas li::before { content: "✅"; }
+
+/* ---------- Aviso de inatividade (util.js) ---------- */
+
+.aviso-inatividade {
+  position: fixed; inset: 0; z-index: 9999;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(20, 22, 26, .82);
+  color: #fff; text-align: center; padding: 24px;
+}
+.aviso-inatividade .caixa { max-width: 640px; }
+.aviso-inatividade .contagem { font-size: 5rem; font-weight: 800; color: var(--destaque); }
+
+/* ---------- Toast ---------- */
+
+.toast {
+  position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%);
+  background: var(--texto); color: #fff; padding: 14px 26px;
+  border-radius: 999px; font-weight: 700; z-index: 9000;
+  box-shadow: var(--sombra); animation: surgir .2s ease-out;
+}
+
+/* ---------- Rodapé de marca ---------- */
+
+.rodape {
+  text-align: center; color: var(--texto-suave);
+  padding: 28px var(--espaco) 40px; font-size: .85rem;
+}
+
+/* ---------- Carimbos do passaporte ---------- */
+
+.carimbo {
+  width: 110px; height: 110px; border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center; flex-direction: column;
+  border: 5px dashed var(--borda); color: var(--texto-suave);
+  font-size: .7rem; font-weight: 800; text-transform: uppercase; text-align: center;
+  transform: rotate(-8deg);
+}
+.carimbo .icone { font-size: 2.2rem; margin: 0; }
+.carimbo.feito { border-style: solid; border-color: var(--cor); color: var(--cor); background: var(--cor-clara); }
+
+/* ---------- Modo simples (criança / idoso): <body class="simples"> ou ?simples=1 ---------- */
+
+body.simples { font-size: 1.3rem; }
+body.simples h1 { font-size: 2.8rem; }
+body.simples h2 { font-size: 2rem; }
+body.simples .btn { min-height: 72px; font-size: 1.3rem; padding: 14px 34px; }
+body.simples .btn.grande { min-height: 96px; font-size: 1.6rem; }
+body.simples .etiqueta { font-size: .9rem; }
+
+/* ---------- Painel admin oculto (5 cliques no título) ---------- */
+
+.painel-admin {
+  position: fixed; inset: 5vh 5vw; z-index: 9500; overflow: auto;
+  background: var(--superficie); border: 4px solid var(--texto); border-radius: var(--raio);
+  padding: var(--espaco); box-shadow: 0 20px 60px rgba(0,0,0,.35);
+}
+.painel-admin table { width: 100%; border-collapse: collapse; }
+.painel-admin td, .painel-admin th { border-bottom: 1px solid var(--borda); padding: 8px; text-align: left; }
+
+/* ---------- Cartão de QR para o celular (sem link externo no PC) ---------- */
+
+.qr-celular {
+  display: grid; grid-template-columns: auto 1fr; gap: 18px; align-items: center;
+  background: var(--superficie); border: 3px solid var(--cor, var(--texto)); border-radius: var(--raio); padding: 16px;
+}
+.qr-celular .url { font-weight: 800; font-size: 1.05rem; word-break: break-all; }
+.qr-celular .etiquetas { margin-top: 6px; display: flex; flex-wrap: wrap; gap: 6px; }
+
+/* ---------- Acessibilidade ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+
+/* ---------- Impressão ---------- */
+
+@media print {
+  .topo, .nao-imprimir, .aviso-inatividade, .toast { display: none !important; }
+  body { background: #fff; }
+  .cartao { box-shadow: none; }
+}
