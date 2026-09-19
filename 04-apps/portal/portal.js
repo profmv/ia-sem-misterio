@@ -44,11 +44,6 @@
     var palco = $("#ocioso-palco");
     palco.innerHTML = "";
     var titulo = c.titulo;
-    if (c.proximoShow) {
-      var s = IA.proximoShow();
-      if (!s) return false; // sem mais shows: pula a cartela
-      titulo = s.faltam <= 0 ? "Tópico acontecendo AGORA" : "Próximo tópico às " + s.hora;
-    }
     // Título comprido (3+ linhas na fonte cheia) usa fonte menor para não encostar no "Toque..."
     palco.classList.toggle("longo", String(titulo || "").length > 40);
     if (c.imagem) {
@@ -60,15 +55,11 @@
     }
     palco.appendChild(el("div", { class: "ocioso-titulo" }, [titulo]));
     if (c.texto) palco.appendChild(el("div", { class: "ocioso-texto" }, [c.texto]));
-    return true;
   }
 
   function girarOcioso() {
-    for (var tentativas = 0; tentativas < D.ocioso.length; tentativas++) {
-      var c = D.ocioso[cartelaAtual % D.ocioso.length];
-      cartelaAtual++;
-      if (cartelaOcioso(c)) return;
-    }
+    cartelaOcioso(D.ocioso[cartelaAtual % D.ocioso.length]);
+    cartelaAtual++;
   }
 
   function mostrarOcioso() {
@@ -115,28 +106,17 @@
         ])
       ]));
     });
-    atualizarAvisoShow();
     $("#btn-simples").textContent = simples ? "🔍 Letras normais" : "🔍 Letras maiores";
     IA.mostrarTela("tela-inicio");
   }
 
-  function atualizarAvisoShow() {
-    var s = IA.proximoShow();
-    var aviso = $("#aviso-show");
-    if (!s || s.faltam > 25) { aviso.classList.add("oculto"); return; }
-    aviso.classList.remove("oculto");
-    $("#aviso-show-texto").textContent = s.faltam <= 0
-      ? "Tópico acontecendo AGORA no fundo da carreta: “" + s.titulo + "”. Pode olhar daqui!"
-      : "Às " + s.hora + " (daqui a " + s.faltam + " min) tem tópico de 8 minutos: “" + s.titulo + "”.";
-  }
-  setInterval(atualizarAvisoShow, 30000);
-
-  $("#btn-me-escolhe").addEventListener("click", function () { abrirTrilha(D.ordem[0], "ver"); });
+  // O botão "Não sei, me escolhe" saiu da tela inicial por decisão do instrutor (19/09): quem não
+  // sabe escolher é encaminhado pelo concierge na porta, que pergunta o que a pessoa mais usa.
   $("#btn-simples").addEventListener("click", function () { simples = !simples; mostrarInicio(); });
-  $("#btn-ouvir-inicio").addEventListener("click", function () {
-    IA.falar("O que você quer hoje? Escolha uma das quatro opções: " +
+  IA.ligarOuvir($("#btn-ouvir-inicio"), function () {
+    return "O que você quer hoje? Escolha uma das quatro opções: " +
       D.ordem.map(function (id) { return IA.TRILHAS[id].nome; }).join(". ") +
-      ". Cada uma leva uns dez minutos. Se não souber, clique em: não sei, me escolhe.");
+      ". Cada uma leva uns dez minutos.";
   });
 
   /* =========================================================
@@ -175,6 +155,7 @@
   }
 
   function desenhar() {
+    IA.parar(); // toda troca de etapa/cartela cala a leitura em voz alta
     desenharNav();
     var corpo = $("#trilha-corpo");
     corpo.innerHTML = "";
@@ -197,6 +178,25 @@
     return img;
   }
 
+  // Link direto para um site (abre em outra aba). l = { texto, url }; sem url vira texto simples.
+  // Termina com a seta pulsante (.seta-pulsa, de shared/animacoes.css); "comIcone" põe o ícone de globo antes do nome.
+  function linkSite(classe, l, estilo, comIcone) {
+    if (!l.url) return el("span", {}, [l.texto]);
+    var globo = comIcone && window.IAIcones ? window.IAIcones.svg("globe") : "";
+    return el("a", { class: classe, href: l.url, target: "_blank", rel: "noopener noreferrer", style: estilo || null }, [
+      globo ? el("span", { class: "icone-site", "aria-hidden": "true", html: globo }) : null,
+      l.texto,
+      el("span", { class: "seta-pulsa", "aria-hidden": "true" }, ["↗"])
+    ]);
+  }
+
+  // Ferramenta pode ser um id do catálogo (shared/dados-ferramentas.js) ou um objeto {nome, url, ...}
+  var catalogo = {};
+  (window.FERRAMENTAS || []).forEach(function (f) { catalogo[f.id] = f; });
+  function ferramenta(f) { return typeof f === "string" ? catalogo[f] : f; }
+  // Nome curto: "Bing Image Creator (Criador de Imagens do Bing)" -> "Bing Image Creator"
+  function nomeCurto(f) { return String(f.nome || "").split(" (")[0]; }
+
   /* ---------- VER ---------- */
 
   function desenharVer(corpo) {
@@ -207,13 +207,38 @@
     // Transcrição de áudio fica junto do áudio (coluna da mídia), para a coluna de texto caber na tela
     var transcricao = c.transcricao ? el("div", { class: "transcricao" }, [c.transcricao]) : null;
 
-    var colTexto = el("div", { class: "col-texto" }, [
+    // Sites citados no cartão: links diretos (só os que têm endereço). Com galeria ou emoji sozinho, ficam
+    // embaixo da ilustração (a coluna do texto já é a mais alta, então não empurram a navegação);
+    // nos demais (áudio, vídeo, imagem, comparar), embaixo do texto.
+    var links = (c.links || []).filter(function (l) { return l.url; });
+    var caixaLinks = links.length ? el("div", { class: "ver-links" }, links.map(function (l) { return linkSite("link-site", l, null, true); })) : null;
+    var linksNoVisual = !!caixaLinks && !!(c.galeria || (c.emoji && !c.audio && !c.imagem && !c.video && !c.comparar));
+
+    var colTexto = el("div", { class: "col-texto" + (caixaLinks && !linksNoVisual ? " com-links" : "") }, [
       el("div", { class: "etiqueta contador" }, ["Ver " + (indiceVer + 1) + " de " + lista.length]),
       el("h2", {}, [texto(c, "titulo")]),
       c.texto ? el("div", { class: "texto" }, [texto(c, "texto")]) : null,
       c.audio ? null : transcricao,
-      c.nota ? el("p", { class: "etiqueta nota" }, ["ℹ️ " + c.nota]) : null
+      c.nota ? el("p", { class: "etiqueta nota" }, ["ℹ️ " + c.nota]) : null,
+      linksNoVisual ? null : caixaLinks
     ]);
+
+    /* A CARTELA COM PERGUNTA TRANCA O "PRÓXIMO" (pedido do instrutor, 19/09).
+       Onde a tela começa com uma atividade — "Quem dessas pessoas existe?", "Escute esta voz" —
+       dava para apertar Próximo e passar direto, sem nunca ver a resposta, que é o conteúdo da
+       tela. Enquanto a resposta não for revelada o botão fica `disabled`, e só isso já entrega as
+       três coisas pedidas: `estilo.css` o deixa transparente (`.btn[disabled]`), `animacoes.css`
+       o tira do halo e do brilho (`:not([disabled])`) e o navegador ignora o clique — o som de
+       clique também, porque `efeitos.js` pula alvo com `disabled`.
+       "Pular ⏭" continua livre de propósito: ali a pessoa está dizendo que quer sair do VER
+       inteiro, e não passando pela resposta sem ver. */
+    var esperandoResposta = !!c.revelar, btnProximo = null;
+    function liberarProximo() {
+      esperandoResposta = false;
+      if (!btnProximo) return;
+      btnProximo.disabled = false;
+      btnProximo.removeAttribute("title");
+    }
 
     if (c.revelar) {
       var caixaRevelar = el("div", { class: "revelar" });
@@ -223,6 +248,7 @@
           el("div", { class: "titulo" }, ["😮 " + (c.revelarTitulo || "Resposta")]),
           el("p", {}, [texto(c, "revelar")])
         ]));
+        liberarProximo();
       } }, ["👉 " + (c.botaoRevelar || "Ver a resposta")]);
       caixaRevelar.appendChild(botao);
       colTexto.appendChild(caixaRevelar);
@@ -230,7 +256,7 @@
 
     var visual = null;
     if (c.galeria) {
-      visual = el("div", { class: "galeria" }, c.galeria.map(function (s) { return imagem(s); }));
+      visual = el("div", {}, [el("div", { class: "galeria" }, c.galeria.map(function (s) { return imagem(s); })), linksNoVisual ? caixaLinks : null]);
     } else if (c.imagem) {
       visual = imagem(c.imagem, c.alt);
     } else if (c.audio) {
@@ -254,7 +280,7 @@
         ]);
       }));
     } else if (c.emoji) {
-      visual = el("div", { class: "emoji-grande" }, [c.emoji]);
+      visual = el("div", {}, [el("div", { class: "emoji-grande" }, [c.emoji]), linksNoVisual ? caixaLinks : null]);
     }
 
     corpo.appendChild(el("div", { class: "cartela" + (c.comparar ? " cartela-comparar" : "") + (temVisual ? "" : " so-texto") }, [
@@ -263,15 +289,22 @@
     ]));
 
     var ultimo = indiceVer === lista.length - 1;
+    btnProximo = el("button", {
+      class: "btn cor grande", type: "button",
+      disabled: esperandoResposta,
+      title: esperandoResposta ? "Veja a resposta antes de seguir" : null,
+      onclick: function () {
+        if (btnProximo.disabled) return;
+        if (ultimo) etapa = "fazer"; else indiceVer++;
+        desenhar();
+      }
+    }, [ultimo ? "Agora é sua vez ▶" : "Próximo ▶"]);
     corpo.appendChild(el("div", { class: "navegacao" }, [
       indiceVer === 0 ? botaoTrilhas() : el("button", { class: "btn claro", type: "button", onclick: function () { indiceVer--; desenhar(); } }, ["← Voltar"]),
       el("div", { class: "linha" }, [
         IA.botaoOuvir(function () { return [texto(c, "titulo"), texto(c, "texto"), c.transcricao].filter(Boolean).join(". "); }),
         !ultimo ? el("button", { class: "btn claro", type: "button", onclick: function () { etapa = "fazer"; desenhar(); } }, ["Pular ⏭"]) : null,
-        el("button", { class: "btn cor grande", type: "button", onclick: function () {
-          if (ultimo) etapa = "fazer"; else indiceVer++;
-          desenhar();
-        } }, [ultimo ? "Agora é sua vez ▶" : "Próximo ▶"])
+        btnProximo
       ])
     ]));
   }
@@ -296,67 +329,84 @@
 
   /* ---------- LEVAR ---------- */
 
-  // Cartão de QR enxuto para o LEVAR caber em 1366×768 sem rolar: sem a descrição longa da ferramenta e
-  // sem a linha "Aponte a câmera..." (ela aparece uma vez só, no título do bloco de QRs).
-  // "resumo" (opcional) entra no máximo em 2 linhas — usado só no card do kit (texto da oferta).
-  function qrEnxuto(f, tamanho, resumo) {
-    var c = IA.qrCelular({ nome: f.nome, url: f.url, login: f.login, custo: f.custo }, { tamanho: tamanho });
-    var url = c.querySelector(".url"), instrucao = url && url.previousElementSibling;
-    if (instrucao && instrucao.textContent.indexOf("📱") === 0) instrucao.remove();
-    if (resumo && url) url.parentNode.insertBefore(el("div", { class: "resumo" }, [resumo]), url);
+  // Cartão de QR do kit, enxuto para o LEVAR caber em 1366×768 sem rolar: sem a linha "Aponte a câmera..."
+  // (class "instrucao"; o título do bloco já diz "Leve no celular"). O endereço continua sendo um link
+  // clicável (feito por IA.qrCelular).
+  function qrEnxuto(f, tamanho) {
+    var c = IA.qrCelular({ nome: nomeCurto(f), url: f.url }, { tamanho: tamanho });
+    var instrucao = c.querySelector(".instrucao");
+    if (instrucao) instrucao.remove();
     return c;
   }
 
+  // LEVAR: um olhar só — frase-chave (herói), regra (chips), 2 dicas, sites (links) e UM QR (o do kit).
+  // Os blocos entram um após o outro (classes .entra/.entra-pop de shared/animacoes.css; --atraso cresce).
   function desenharLevar(corpo) {
-    var t = D.trilhas[trilha], L = t.levar, meta = IA.TRILHAS[trilha], m = EV.marca || {}, of = EV.oferta || {};
+    var t = D.trilhas[trilha], L = t.levar, m = EV.marca || {}, of = EV.oferta || {};
 
-    var esquerda = el("div", { class: "levar-col" }, [
-      el("div", { class: "faixa" }, [
-        el("div", { class: "rotulo" }, ["Frase para contar a um amigo:"]),
-        el("div", { class: "frase-chave" }, ["“" + texto(L, "fraseChave") + "”"])
-      ]),
-      L.regra ? el("div", { class: "regra" }, [
-        el("div", { class: "regra-titulo" }, [L.regra.titulo]),
-        el("div", { class: "regra-linhas" }, L.regra.linhas.map(function (l) { return el("span", {}, [l]); })),
-        L.regra.rodape ? el("div", { class: "regra-rodape" }, [L.regra.rodape]) : null
-      ]) : null,
-      // No máximo 2 dicas: é o que cabe na tela sem rolar
-      L.dicas && L.dicas.length ? el("ul", { class: "alerta-lista dicas" }, L.dicas.slice(0, 2).map(function (d) { return el("li", {}, [d]); })) : null
+    // Relógio da sequência: cada chamada devolve o atraso deste bloco e adianta "passo" segundos
+    var relogio = 0;
+    function atraso(passo) { var a = "--atraso:" + relogio.toFixed(2) + "s"; relogio += passo; return a; }
+
+    var heroi = el("div", { class: "faixa levar-heroi entra", style: atraso(.5) }, [
+      el("div", { class: "rotulo" }, ["Frase para contar a um amigo:"]),
+      el("div", { class: "frase-chave" }, ["“" + texto(L, "fraseChave") + "”"])
     ]);
 
-    var qrs = el("div", { class: "qrs" });
-    if (m.linkMateriais) {
-      // Texto da oferta só com link curto (cabe em 1 linha); link comprido já ocupa 2–3 linhas no card
-      var resumoKit = IA.urlCurta(m.linkMateriais).length <= 30 ? of.texto : "";
-      qrs.appendChild(qrEnxuto({ nome: of.titulo || "Leve o kit completo", url: m.linkMateriais, login: "nao", custo: "gratis" }, 120, resumoKit));
+    var regra = null;
+    if (L.regra) {
+      var caixaRegra = el("div", { class: "regra entra", style: atraso(.25) }, [
+        el("div", { class: "regra-titulo" }, [L.regra.titulo])
+      ]);
+      // Cada linha é um texto ou { texto, url } (site com link direto); os chips entram um por um
+      var linhas = el("div", { class: "regra-linhas" });
+      L.regra.linhas.forEach(function (l) {
+        var estilo = atraso(.15);
+        linhas.appendChild(typeof l === "string" ? el("span", { class: "entra-pop", style: estilo }, [l]) : linkSite("regra-link entra-pop", l, estilo));
+      });
+      caixaRegra.appendChild(linhas);
+      if (L.regra.rodape) caixaRegra.appendChild(el("div", { class: "regra-rodape" }, [L.regra.rodape]));
+      regra = caixaRegra;
     }
-    // Ferramenta pode ser um id do catálogo (shared/dados-ferramentas.js) ou um objeto {nome, url, ...}
-    var catalogo = {};
-    (window.FERRAMENTAS || []).forEach(function (f) { catalogo[f.id] = f; });
-    (L.ferramentas || [])
-      .map(function (f) { return typeof f === "string" ? catalogo[f] : f; })
-      .filter(Boolean)
-      .slice(0, m.linkMateriais ? 1 : 2)
-      .forEach(function (f) { qrs.appendChild(qrEnxuto(f, 120)); });
 
-    var direita = el("div", { class: "levar-col" }, [
-      el("div", { class: "palavra-trilha" }, [
-        el("div", { class: "rotulo" }, ["✍️ Escreva no seu cartão a palavra desta trilha:"]),
-        el("div", { class: "palavra" }, [meta.palavra])
-      ]),
-      qrs.children.length ? el("div", { class: "qrs-bloco" }, [
-        el("div", { class: "rotulo" }, ["📱 No celular (com internet): aponte a câmera ou digite:"]),
-        qrs
-      ]) : null
-    ]);
+    // No máximo 2 dicas: é o que cabe na tela sem rolar
+    var dicas = L.dicas && L.dicas.length
+      ? el("ul", { class: "alerta-lista dicas" }, L.dicas.slice(0, 2).map(function (d) { return el("li", { class: "entra", style: atraso(.2) }, [d]); }))
+      : null;
 
-    corpo.appendChild(el("div", { class: "levar-grade" }, [esquerda, direita]));
+    // "Sites para testar": todas as ferramentas da trilha como links diretos. Sites que já são links
+    // na caixa da regra (ex.: "3 para brincar em casa") não se repetem.
+    var ferramentas = (L.ferramentas || []).map(ferramenta).filter(Boolean);
+    var jaLinkados = {};
+    if (L.regra) L.regra.linhas.forEach(function (l) { if (l.url) jaLinkados[l.url] = true; });
+    var sites = ferramentas.filter(function (f) { return f.url && !jaLinkados[f.url]; });
+    var blocoSites = null;
+    if (sites.length) {
+      var inicioSites = atraso(.15);
+      var lista = el("div", { class: "sites" });
+      sites.forEach(function (f, i) {
+        lista.appendChild(linkSite("link-site entra", { texto: nomeCurto(f), url: f.url }, i === 0 ? inicioSites : atraso(.15), true));
+      });
+      blocoSites = el("div", { class: "sites-bloco" }, [el("div", { class: "rotulo entra", style: inicioSites }, ["Sites para testar"]), lista]);
+    }
 
-    corpo.appendChild(el("div", { class: "navegacao" }, [
+    // Um QR só: o do kit (site publicado)
+    var blocoQr = m.linkMateriais ? el("div", { class: "qrs-bloco entra-pop", style: atraso(.4) }, [
+      el("div", { class: "rotulo" }, ["Leve no celular"]),
+      el("div", { class: "qrs" }, [qrEnxuto({ nome: of.titulo || "Leve o kit completo", url: m.linkMateriais }, 130)])
+    ]) : null;
+
+    corpo.appendChild(el("div", { class: "levar-grade" }, [
+      heroi,
+      el("div", { class: "levar-col" }, [regra, dicas]),
+      el("div", { class: "levar-col" }, [blocoSites, blocoQr])
+    ]));
+
+    corpo.appendChild(el("div", { class: "navegacao entra", style: atraso(.6) }, [
       el("button", { class: "btn claro", type: "button", onclick: function () { etapa = "fazer"; desenhar(); } }, ["← Voltar"]),
       el("div", { class: "linha" }, [
         el("button", { class: "btn cor grande", type: "button", onclick: function () { marcar("concluidas", trilha); mostrarInicio(); } }, ["Fazer outra trilha"]),
-        el("button", { class: "btn destaque grande", type: "button", onclick: function () { marcar("concluidas", trilha); tchau(); } }, ["✔ Terminei"])
+        el("button", { class: "btn destaque grande btn-chama", type: "button", onclick: function () { marcar("concluidas", trilha); tchau(); } }, ["✔ Terminei"])
       ])
     ]));
     IA.festa();
@@ -367,8 +417,6 @@
      ========================================================= */
 
   function tchau() {
-    var s = IA.proximoShow();
-    $("#tchau-show").textContent = s && s.faltam > 0 ? "🎤 Às " + s.hora + " tem tópico de 8 minutos aqui: “" + s.titulo + "”." : "";
     document.body.className = "";
     IA.mostrarTela("tela-tchau");
     setTimeout(reiniciar, 7000);

@@ -1,0 +1,10 @@
+Sons de interface - origem e licenca
+====================================
+- abrir, fechar, sucesso, erro, quase, etapa, conquista, vitoria, revela, suspense, inicio, rodada,
+  sorteio, passo, contratempo, alerta: criados pelo autor do projeto (english-party-game/audio); uso no site liberado por ele.
+- clique, criar, proximo, voltar: game-enemy-frontiers/sons, licenca CC0 1.0 (dominio publico).
+  proximo e voltar mudaram de origem em 19/09/2026: vinham de right.ogg e left.ogg, que sao VOZ
+  dizendo "right" e "left" em ingles - palavra falada em ingles nao cabe numa oficina em portugues.
+- Os estouros de fogos de artificio sao sintetizados no navegador (Web Audio), sem arquivo.
+- O site NAO tem musica de fundo.
+Preparados por _trabalho/ferramentas/preparar_sons.py (MP3 mono, pico normalizado em -2 dBFS, trechos longos cortados com fade).

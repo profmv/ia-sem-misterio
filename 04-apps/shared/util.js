@@ -13,12 +13,12 @@
   var EV = window.EVENTO || {};
   var PREFIXO = "iasm:";
 
-  // Nomes "de fachada" (benefício) + palavra da trilha para o cartão físico
+  // Nomes "de fachada" (benefício) de cada trilha
   var TRILHAS = {
-    perigos:       { id: "perigos",       nome: "Não caia em golpe",       curto: "Golpes",       icone: "🛡️", classe: "t-perigos",       palavra: "PALAVRA" },
-    generativa:    { id: "generativa",    nome: "Crie algo em 2 minutos",  curto: "Criar",        icone: "🎨", classe: "t-generativa",    palavra: "PINCEL" },
-    produtividade: { id: "produtividade", nome: "Trabalhe melhor com IA",  curto: "Trabalho",     icone: "🚀", classe: "t-produtividade", palavra: "PEDIR" },
-    incriveis:     { id: "incriveis",     nome: "Veja o impossível",       curto: "Impossível",   icone: "⭐", classe: "t-incriveis",     palavra: "CHUTE" }
+    perigos:       { id: "perigos",       nome: "Não caia em golpe",       curto: "Golpes",       icone: "🛡️", classe: "t-perigos" },
+    generativa:    { id: "generativa",    nome: "Crie algo em 2 minutos",  curto: "Criar",        icone: "🎨", classe: "t-generativa" },
+    produtividade: { id: "produtividade", nome: "Trabalhe melhor com IA",  curto: "Trabalho",     icone: "🚀", classe: "t-produtividade" },
+    incriveis:     { id: "incriveis",     nome: "Veja o impossível",       curto: "Impossível",   icone: "⭐", classe: "t-incriveis" }
   };
 
   /* ---------- DOM ---------- */
@@ -52,8 +52,9 @@
     });
   }
 
-  // Troca a tela visível: <section class="tela" id="tela-inicio">
+  // Troca a tela visível: <section class="tela" id="tela-inicio">. Também cala a leitura em voz alta.
   function mostrarTela(id) {
+    parar();
     $$(".tela").forEach(function (t) { t.classList.toggle("ativa", t.id === id); });
     window.scrollTo(0, 0);
   }
@@ -153,6 +154,7 @@
 
   // Volta ao portal. "trilha" (ex.: "perigos") faz o portal abrir o passo LEVAR dessa trilha.
   function voltarAoPortal(trilha) {
+    parar();
     location.href = PORTAL + (trilha ? "?voltou=" + encodeURIComponent(trilha) + sufixoSimples(false) : sufixoSimples(true));
   }
 
@@ -168,6 +170,7 @@
     var timer = null, contador = null, overlay = null;
 
     function resetar() {
+      parar();
       limparVisitante();
       if (typeof opcoes.aoResetar === "function") return opcoes.aoResetar();
       if (/\/portal\/(index\.html)?$/.test(location.pathname)) location.href = location.pathname;
@@ -257,27 +260,80 @@
     setTimeout(function () { t.remove(); }, ms || 2600);
   }
 
+  /* ---------- Leitura em voz alta (com botão Ouvir/Parar) ---------- */
+
+  // Fala em andamento: utterance, botão que a iniciou (opcional), timer de vigilância.
+  var voz = { u: null, botao: null, timer: null, iniciou: false, parados: 0 };
+
+  function rotuloOuvir(botao, falando) {
+    botao.textContent = falando ? "⏹ Parar" : "🔊 Ouvir";
+    botao.setAttribute("aria-label", falando ? "Parar a leitura" : "Ouvir este texto");
+  }
+
+  // Zera o estado e devolve o rótulo "Ouvir" ao botão (não chama cancel).
+  function encerrarVoz() {
+    clearInterval(voz.timer);
+    var botao = voz.botao;
+    voz.u = null; voz.botao = null; voz.timer = null; voz.iniciou = false; voz.parados = 0;
+    if (botao) rotuloOuvir(botao, false);
+  }
+
+  // Para a leitura agora e volta o rótulo do botão. Segura para chamar a qualquer hora.
+  function parar() {
+    try { if ("speechSynthesis" in window) speechSynthesis.cancel(); } catch (e) {}
+    encerrarVoz();
+  }
+
+  // A cada 300 ms: se o botão saiu da tela (troca de cartela/etapa), cala; se a fala já acabou
+  // sem avisar (o Chrome às vezes não dispara "end"), volta o rótulo.
+  function vigiarVoz() {
+    if (voz.botao && !document.documentElement.contains(voz.botao)) { parar(); return; }
+    try {
+      if (voz.iniciou && !speechSynthesis.speaking && !speechSynthesis.pending) {
+        if (++voz.parados >= 2) encerrarVoz();
+      } else voz.parados = 0;
+    } catch (e) {}
+  }
+
   // Lê um texto em voz alta (ajuda quem tem dificuldade de leitura). Funciona offline no Windows.
-  function falar(texto) {
+  // "botao" (opcional): botão que muda para "Parar" enquanto a fala durar.
+  function falar(texto, botao) {
     try {
       if (!("speechSynthesis" in window)) return false;
-      speechSynthesis.cancel();
+      parar();
       var u = new SpeechSynthesisUtterance(texto);
       u.lang = "pt-BR";
       u.rate = 0.95;
-      var voz = speechSynthesis.getVoices().filter(function (v) { return /pt(-|_)BR/i.test(v.lang); })[0];
-      if (voz) u.voice = voz;
+      var v = speechSynthesis.getVoices().filter(function (x) { return /pt(-|_)BR/i.test(x.lang); })[0];
+      if (v) u.voice = v;
+      voz.u = u; voz.botao = botao || null;
+      // Eventos atrasados de uma fala já cancelada (voz.u diferente) são ignorados
+      u.onstart = function () { if (voz.u === u) voz.iniciou = true; };
+      u.onend = u.onerror = function () { if (voz.u === u) encerrarVoz(); };
+      if (botao) rotuloOuvir(botao, true);
+      voz.timer = setInterval(vigiarVoz, 300);
       speechSynthesis.speak(u);
       return true;
-    } catch (e) { return false; }
+    } catch (e) { encerrarVoz(); return false; }
+  }
+
+  // Liga um botão existente como alternador: 1º clique lê, 2º clique (ou o fim da fala) volta a "Ouvir".
+  function ligarOuvir(botao, obterTexto) {
+    botao.addEventListener("click", function () {
+      if (voz.botao === botao) { parar(); return; }
+      falar(typeof obterTexto === "function" ? obterTexto() : obterTexto, botao);
+    });
+    return botao;
   }
 
   function botaoOuvir(obterTexto) {
-    return el("button", {
-      class: "btn claro", type: "button", "aria-label": "Ouvir este texto",
-      onclick: function () { falar(typeof obterTexto === "function" ? obterTexto() : obterTexto); }
-    }, ["🔊 Ouvir"]);
+    return ligarOuvir(el("button", { class: "btn claro", type: "button", "aria-label": "Ouvir este texto" }, ["🔊 Ouvir"]), obterTexto);
   }
+
+  // Rede de segurança: sair da página ou esconder a aba cala a leitura
+  window.addEventListener("pagehide", parar);
+  window.addEventListener("beforeunload", parar);
+  document.addEventListener("visibilitychange", function () { if (document.hidden) parar(); });
 
   // Comemoração leve, sem biblioteca
   function festa() {
@@ -329,27 +385,24 @@
   // URL sem "https://" e sem barra final, para ler em voz alta ou digitar
   function urlCurta(url) { return String(url || "").replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, ""); }
 
-  // Cartão "abra no seu celular": QR + endereço + etiquetas. Nunca abre site no PC do visitante,
-  // a não ser que EVENTO.linksExternos seja true (PC do instrutor).
-  // ferramenta: objeto de window.FERRAMENTAS ou { nome, url, login, custo }
+  // Cartão "abra no seu celular": título + QR + instrução + endereço. O endereço (.url) é sempre um link
+  // que abre em outra aba (serve a quem aponta a câmera e a quem já está no navegador).
+  // A linha "Aponte a câmera..." tem class "instrucao" (o portal a remove por essa classe).
+  // ferramenta: objeto de window.FERRAMENTAS ou { nome, url } (login/custo do catálogo não aparecem no cartão)
   function qrCelular(ferramenta, opcoes) {
     var f = ferramenta || {};
     opcoes = opcoes || {};
     var codigo = qr(f.url, opcoes.tamanho || 150);
-    var etiquetas = [el("span", { class: "etiqueta internet" }, ["🌐 precisa de internet"])];
-    if (f.login === "sim") etiquetas.push(el("span", { class: "etiqueta login" }, ["pede cadastro"]));
-    else if (f.login === "nao") etiquetas.push(el("span", { class: "etiqueta ok" }, ["sem cadastro"]));
-    if (f.custo === "gratis") etiquetas.push(el("span", { class: "etiqueta ok" }, ["grátis"]));
-    else if (f.custo === "gratis-com-limite") etiquetas.push(el("span", { class: "etiqueta" }, ["grátis com limite"]));
     return el("div", { class: "qr-celular" }, [
       codigo || el("div", { style: "font-size:3rem" }, ["📱"]),
       el("div", {}, [
         el("div", { style: "font-weight:800;font-size:1.2rem" }, [(opcoes.titulo || f.nome || "Site")]),
         f.descricao ? el("div", {}, [f.descricao]) : null,
-        el("div", { style: "margin-top:6px" }, ["📱 Aponte a câmera do seu celular ou digite:"]),
-        el("div", { class: "url" }, [urlCurta(f.url)]),
-        el("div", { class: "etiquetas" }, etiquetas),
-        EV.linksExternos && f.url ? el("a", { class: "btn claro", href: f.url, target: "_blank", rel: "noopener noreferrer", style: "margin-top:8px" }, ["Abrir aqui ↗"]) : null
+        el("div", { class: "instrucao", style: "margin-top:6px" }, ["Aponte a câmera do celular ou toque no endereço:"]),
+        el(f.url ? "a" : "div", {
+          class: "url", style: "display:block;text-decoration:underline;text-underline-offset:2px",
+          href: f.url || null, target: f.url ? "_blank" : null, rel: f.url ? "noopener noreferrer" : null
+        }, [urlCurta(f.url), f.url ? el("span", { class: "seta-pulsa", "aria-hidden": "true" }, [" ↗"]) : null])
       ])
     ]);
   }
@@ -399,7 +452,7 @@
     PORTAL: PORTAL, voltarAoPortal: voltarAoPortal,
     autoReset: autoReset,
     topo: topo, toast: toast,
-    falar: falar, botaoOuvir: botaoOuvir, festa: festa,
+    falar: falar, parar: parar, ligarOuvir: ligarOuvir, botaoOuvir: botaoOuvir, festa: festa,
     qr: qr, urlCurta: urlCurta, qrCelular: qrCelular, midia: midia,
     proximoShow: proximoShow
   };

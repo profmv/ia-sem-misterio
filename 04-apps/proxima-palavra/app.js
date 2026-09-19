@@ -87,7 +87,8 @@
     fb.innerHTML = "";
     fb.appendChild(el("div", { class: "titulo" }, [acertou ? "✅ Igualzinho à IA!" : "🤔 A mais provável era “" + melhor + "”"]));
     fb.appendChild(el("p", { style: "margin:0" }, [r.comentario]));
-    if (acertou) IA.festa();
+    // errar aqui não é falha: só um "quase", sem efeito punitivo
+    if (acertou) IA.acerto(fb); else IA.som("quase");
 
     var ultima = rodada === D.adivinhe.length - 1;
     $("#btn-proxima-rodada").textContent = ultima ? "Ver a máquina escrevendo ▶" : "Próxima ▶";
@@ -237,8 +238,9 @@
     var ativo = IA.$("#comecos .chip.ativo");
     iniciarMaquina(ativo ? ativo.getAttribute("data-comeco") : D.comecos[0]);
   });
-  $("#btn-ouvir").addEventListener("click", function () {
-    IA.falar(palavras.filter(function (w) { return w !== "."; }).map(bonita).join(" "));
+  // alterna Ouvir/Parar: o segundo clique cala a voz (IA.ligarOuvir cuida do rótulo)
+  IA.ligarOuvir($("#btn-ouvir"), function () {
+    return palavras.filter(function (w) { return w !== "."; }).map(bonita).join(" ");
   });
   $("#temperatura").addEventListener("input", function () { if (!terminou) desenharMaquina(false); else explicarTemperatura(); });
 
@@ -314,6 +316,6 @@
      5. Fim
      ========================================================= */
 
-  $("#btn-ir-fim").addEventListener("click", function () { IA.mostrarTela("tela-fim"); IA.festa(); IA.contar("proxima-palavra_concluido"); });
+  $("#btn-ir-fim").addEventListener("click", function () { IA.mostrarTela("tela-fim"); IA.festa("medio"); IA.contar("proxima-palavra_concluido"); });
   $("#btn-carimbo").addEventListener("click", function () { IA.voltarAoPortal(trilha); });
 })();

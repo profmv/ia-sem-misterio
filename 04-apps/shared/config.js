@@ -7,8 +7,9 @@ window.EVENTO = {
   nomeOficina: "IA sem Mistério",
   slogan: "Crie com IA. Trabalhe melhor. Não caia em golpe.",
   data: "Sábado, 19/09/2026",
-  local: "Carreta da Inovação — Centro de Londrina",
-  horarioAtendimento: "10h às 12h30",
+  local: "Carreta da Inovação",
+  // Vazio de propósito: sem horários fixos (não dá para garantir o cronograma). Não aparece nas telas.
+  horarioAtendimento: "",
 
   instrutor: {
     nome: "Seu Nome Aqui",
@@ -38,15 +39,10 @@ window.EVENTO = {
     aulaGratuita: "Aula gratuita on-line: DIA/HORA A DEFINIR"
   },
 
-  // Horários dos tópicos de 8 minutos no PC do instrutor (P0).
-  // Aparecem no portal, na tela de atração e no painel. (o campo continua se chamando "show") = número do tópico nos slides.
-  shows: [
-    { hora: "10:15", show: 1, trilha: "perigos",       titulo: "Golpe com IA: como te enganam e como escapar" },
-    { hora: "10:45", show: 2, trilha: "generativa",    titulo: "Crie algo em 2 minutos" },
-    { hora: "11:15", show: 3, trilha: "produtividade", titulo: "Use IA melhor que a maioria" },
-    { hora: "11:45", show: 4, trilha: "incriveis",     titulo: "Coisas que só a IA faz" },
-    { hora: "12:15", show: 1, trilha: "perigos",       titulo: "Golpe com IA (bis): como escapar" }
-  ],
+  // Tópicos de 8 minutos no PC do instrutor (P0): vazio de propósito, sem horários fixos.
+  // O campo/estrutura continua existindo para o código que o lê (portal, tela de atração, painel);
+  // cada item, se um dia voltar, é { hora: "HH:MM", show: número do tópico nos slides, trilha, titulo }.
+  shows: [],
 
   // Segundos parado até aparecer "Ainda está aí?" e segundos de contagem até recomeçar.
   inatividadeSegundos: 45,

@@ -7,6 +7,7 @@
   <link rel="icon" href="data:,">
   <title>IA sem Mistério — apresentações e atividades</title>
   <link rel="stylesheet" href="04-apps/shared/estilo.css">
+  <link rel="stylesheet" href="04-apps/shared/animacoes.css">
   <style>
     body { margin: 0; }
     .heroi { background: var(--texto); color: #fff; padding: 28px 0 24px; }
@@ -36,7 +37,14 @@
     .links { display: grid; gap: 8px; }
     .ferr { display: flex; align-items: center; gap: 12px; text-decoration: none; color: var(--texto); background: var(--fundo); border: 2px solid var(--borda); border-radius: 14px; padding: 12px 14px; min-height: 60px; }
     .ferr:hover, .ferr:focus-visible { border-color: var(--cor); }
+    .ferr:focus-visible { outline: 4px solid var(--destaque); outline-offset: 2px; }
     .ferr .ico { flex: none; width: 34px; height: 34px; border-radius: 50%; background: var(--cor); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.1rem; }
+    .ferr .ico .ico-svg { width: 20px; height: 20px; }
+    .ferr .seta-pulsa { flex: none; margin-left: auto; padding-left: 4px; color: var(--cor); font-size: 1.35rem; font-weight: 800; line-height: 1; }
+    /* Ao abrir o "Levar para casa", os blocos entram em sequência (o atraso de cada um vem em --atraso).
+       A animação nasce com o [open], então roda a cada abertura; animacoes.css fornece o keyframe e o easing. */
+    details[open] .seq { animation: an-sobe .6s var(--anim-suave) var(--atraso, 0s) backwards; }
+    @media (prefers-reduced-motion: reduce) { details[open] .seq { animation: none; } }
     .ferr strong { display: block; font-size: 1.05rem; line-height: 1.2; }
     .ferr small { display: block; color: var(--texto-suave); font-size: .88rem; margin-top: 1px; }
     .aviso { background: #fff8e1; border: 2px solid var(--destaque); border-radius: 14px; padding: 12px 14px; margin: 22px 0 0; font-size: .98rem; }
@@ -67,6 +75,8 @@
   </main>
 
   <script src="04-apps/shared/config.js"></script>
+  <script src="04-apps/shared/icones.js"></script>
+  <script src="04-apps/shared/baixar-offline.js"></script>
   <script src="04-apps/shared/dados-ferramentas.js"></script>
   <script src="04-apps/portal/dados-trilhas.js"></script>
   <script src="05-apresentacao/shows.dados.js"></script>
@@ -102,14 +112,16 @@
       "which-face-is-real":    ["Which Face Is Real", "Qual rosto é de verdade?"],
       "duck-ai":               ["Duck.ai", "Converse com a IA"],
       "bing-image-creator":    ["Bing Image Creator", "Crie imagens · login opcional"],
+      "flux-schnell":          ["FLUX.1 schnell", "Crie imagens · pode ter fila"],
+      "ai-duet":               ["AI Duet", "Toque e a IA responde · no computador"],
       "chatgpt-sem-login":     ["ChatGPT", "Converse com a IA"],
       "quick-draw":            ["Quick, Draw!", "Você desenha, a IA adivinha"],
       "plantnet":              ["Pl@ntNet", "Foto de planta → nome"]
     };
     var LEVAR = {
-      perigos:       { passos: ["PRESSA?", "DESLIGA", "LIGA DE VOLTA", "PERGUNTA A PALAVRA"], nota: "Senha e código: ninguém pede, ninguém dá.",
+      perigos:       { passos: ["PRESSA?", "DESLIGA", "LIGA DE VOLTA", "PERGUNTA A PALAVRA"], nota: "Ligue de OUTRO telefone, se puder. Senha e código: ninguém pede, ninguém dá.",
                        links: ["teste-phishing-jigsaw", "which-face-is-real"] },
-      generativa:    { passos: ["O QUÊ", "QUE ESTILO", "ONDE", "QUE DETALHES"], links: ["duck-ai", "bing-image-creator"] },
+      generativa:    { passos: ["O QUÊ", "QUE ESTILO", "ONDE", "QUE DETALHES"], links: ["bing-image-creator", "flux-schnell", "ai-duet"] },
       produtividade: { passos: ["P Papel", "E Explique", "D Detalhe", "I Indique", "R Revise"], links: ["chatgpt-sem-login", "duck-ai"] },
       incriveis:     { links: ["quick-draw", "which-face-is-real", "plantnet"] }
     };
@@ -135,19 +147,26 @@
       // Levar para casa: frase curta + regra em uma linha + links grandes
       var lv = LEVAR[t.trilha] || {};
       var det = el("details", {}, [el("summary", { text: "Levar para casa" })]);
-      if (lev.fraseChave) det.appendChild(el("p", { class: "frase", text: lev.fraseChave }));
+      // Cada bloco recebe class "seq" + atraso crescente: entram um após o outro quando o acordeão abre
+      var relogio = 0;
+      function seq(passo) { var a = "--atraso:" + relogio.toFixed(2) + "s"; relogio += passo; return a; }
+      if (lev.fraseChave) det.appendChild(el("p", { class: "frase seq", style: seq(.15), text: lev.fraseChave }));
       if (lv.passos) {
-        det.appendChild(el("div", { class: "rot", text: "A regra" }));
-        det.appendChild(el("div", { class: "passos" }, lv.passos.map(function (x) { return el("span", { text: x }); })));
-        if (lv.nota) det.appendChild(el("p", { class: "nota", text: lv.nota }));
+        det.appendChild(el("div", { class: "rot seq", style: seq(.1), text: "A regra" }));
+        det.appendChild(el("div", { class: "passos" }, lv.passos.map(function (x) { return el("span", { class: "seq", style: seq(.08), text: x }); })));
+        if (lv.nota) det.appendChild(el("p", { class: "nota seq", style: seq(.15), text: lv.nota }));
       }
       var itens = (lv.links || []).map(function (id) { var f = FER[id], x = LINK[id]; return f && x ? { url: f.url, nome: x[0], sub: x[1] } : null; }).filter(Boolean);
       if (itens.length) {
-        det.appendChild(el("div", { class: "rot", text: "Para testar no celular" }));
+        det.appendChild(el("div", { class: "rot seq", style: seq(.1), text: "Para testar no celular" }));
+        // Link: ícone do site (globo) à esquerda e seta pulsante à direita
         det.appendChild(el("div", { class: "links" }, itens.map(function (f) {
-          return el("a", { class: "ferr", href: f.url, target: "_blank", rel: "noopener noreferrer" }, [
-            el("span", { class: "ico", text: "↗" }),
-            el("span", {}, [el("strong", { text: f.nome }), el("small", { text: f.sub })])
+          var ico = el("span", { class: "ico", "aria-hidden": "true" });
+          ico.innerHTML = window.IAIcones ? window.IAIcones.svg("globe") : "";
+          return el("a", { class: "ferr seq", style: seq(.12), href: f.url, target: "_blank", rel: "noopener noreferrer" }, [
+            ico,
+            el("span", {}, [el("strong", { text: f.nome }), el("small", { text: f.sub })]),
+            el("span", { class: "seta-pulsa", "aria-hidden": "true", text: "↗" })
           ]);
         })));
       }

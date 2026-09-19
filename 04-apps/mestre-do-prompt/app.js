@@ -228,7 +228,7 @@
     fonte.classList.toggle("oculto", !t.fonte);
     if (t.fonte) {
       fonte.appendChild(el("strong", {}, ["📎 " + t.fonte.titulo + ": "]));
-      fonte.appendChild(document.createTextNode(t.fonte.texto));
+      fonte.appendChild(el("span", { "data-emoji": "manter" }, [t.fonte.texto]));
     }
 
     var dica = $("#pedido-dica");
@@ -250,8 +250,10 @@
      Resposta: pedido ruim × pedido bom
      ========================================================= */
 
+  // Textos de exemplo da IA (resposta simulada): o emoji faz parte do CONTEÚDO, então shared/icones.js não o troca por ícone
   function preencherComQuebras(alvo, t) {
     alvo.innerHTML = "";
+    alvo.setAttribute("data-emoji", "manter");
     t.respostaBoa.forEach(function (x, i) {
       if (i > 0) alvo.appendChild(x.novaLinha ? el("br") : document.createTextNode(" "));
       alvo.appendChild(document.createTextNode(x.texto));
@@ -261,6 +263,7 @@
   function mostrarResposta() {
     var t = estado.tarefa;
     $("#resp-ruim-pedido").textContent = "“" + t.pedidoRuim + "”";
+    $("#resp-ruim").setAttribute("data-emoji", "manter");
     $("#resp-ruim").textContent = t.respostaRuim;
 
     var partes = $("#resp-bom-partes");
@@ -295,7 +298,7 @@
     if (t.fonte) {
       return el("div", { class: "referencia" }, [
         el("div", { class: "tit" }, ["📎 Texto original"]),
-        el("div", {}, [t.fonte.texto])
+        el("div", { "data-emoji": "manter" }, [t.fonte.texto])
       ]);
     }
     return el("div", { class: "referencia" }, [
@@ -320,6 +323,7 @@
 
     var caixa = $("#revise-trechos");
     caixa.innerHTML = "";
+    caixa.setAttribute("data-emoji", "manter"); // resposta simulada da IA: emoji é conteúdo
     t.respostaBoa.forEach(function (x, i) {
       if (i > 0) caixa.appendChild(x.novaLinha ? el("br") : document.createTextNode(" "));
       var span = el("span", { class: "trecho", role: "button", tabindex: "0", "data-i": String(i) }, [x.texto]);
@@ -339,9 +343,11 @@
     if (x.errado) { achouErro(span); return; }
     if (span.classList.contains("conferido")) {
       status("Esse você já conferiu: está certo. Tente outro pedaço.", "errado");
+      IA.som("quase");
       return;
     }
     span.classList.add("conferido");
+    IA.erro(span);
     estado.erros++;
     if (estado.erros >= 2) {
       var alvo = spanErrado();
@@ -359,7 +365,8 @@
     span.classList.add("achado");
     var semDica = estado.erros < 2;
     status(semDica ? "🎯 Achou! Esse pedaço está errado." : "🎯 Isso! Esse é o pedaço errado.", "certo");
-    if (semDica && !DEBUG) IA.festa();
+    // achou sem precisar de dica: ganha um fogo pequeno junto com o confete
+    if (!DEBUG) IA.acerto(span, { sequencia: semDica ? 3 : 0 });
 
     var esquerda = $("#revise-esquerda");
     esquerda.className = "achou";
@@ -389,6 +396,7 @@
     if (chat) caixa.appendChild(IA.qrCelular(Object.assign({}, chat, { descricao: "" }), { titulo: "📱 Faça no seu celular: " + chat.nome, tamanho: 130 }));
     if (!concluiu && !DEBUG) { IA.contar("mestre_concluido"); concluiu = true; }
     ir("tela-fim");
+    if (!DEBUG) IA.festa("medio");
   }
 
   $("#btn-outro").addEventListener("click", function () {

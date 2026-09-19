@@ -10,6 +10,12 @@
 (function () {
   var M = "../../05-apresentacao/midia/";
 
+  // Link direto a partir do catálogo (04-apps/shared/dados-ferramentas.js): não duplica URLs.
+  // Sem o catálogo carregado (ex.: tela-atracao.html), a url fica vazia e o portal ignora o link.
+  var CAT = {};
+  (window.FERRAMENTAS || []).forEach(function (f) { CAT[f.id] = f; });
+  function lk(id, texto) { return { texto: texto, url: CAT[id] ? CAT[id].url : "" }; }
+
   window.TRILHAS_PORTAL = {
     ordem: ["perigos", "generativa", "produtividade", "incriveis"],
 
@@ -18,9 +24,7 @@
       { imagem: M + "rostos/rosto-10.jpg", icone: "🤖", titulo: "Essa pessoa não existe.", texto: "Uma IA inventou esse rosto. Você perceberia?" },
       { icone: "🛡️", titulo: "Golpe ou seguro?", texto: "Teste seu olho em 3 minutos." },
       { icone: "🎵", titulo: "Uma música feita por IA em 1 minuto", texto: "Veja o que dá pra criar de graça." },
-      { icone: "🎤", proximoShow: true, texto: "Tópico de 8 minutos, ao vivo, aqui dentro." },
-      { icone: "🆓", titulo: "Grátis · Sem cadastro · 5 minutos", texto: "Não precisa saber nada de computador." },
-      { icone: "🗳️", titulo: "Propaganda eleitoral feita com IA tem de vir com aviso.", texto: "É regra do TSE. Vídeo bombástico e urgente? Confira antes de compartilhar." }
+      { icone: "🆓", titulo: "Grátis · Sem cadastro · 5 minutos", texto: "Não precisa saber nada de computador." }
     ],
 
     trilhas: {
@@ -38,7 +42,8 @@
             botaoRevelar: "Ver a resposta",
             revelarTitulo: "Nenhuma existe!",
             revelar: "Todas foram inventadas por uma IA em segundos. Golpistas usam rostos assim em perfis falsos de namoro, de vendedor e de \"atendente do banco\". Foto não é prova.",
-            revelarSimples: "Todas foram feitas por computador. Foto não prova que a pessoa existe."
+            revelarSimples: "Todas foram feitas por computador. Foto não prova que a pessoa existe.",
+            links: [lk("which-face-is-real", "Which Face Is Real")]
           },
           {
             titulo: "Escute esta voz",
@@ -56,7 +61,7 @@
             texto: "Rosto e voz podem ser imitados em vídeo. Famosos, médicos e jornalistas já apareceram em anúncios falsos vendendo remédio e \"investimento\".",
             textoSimples: "Dá pra fazer vídeo falso de qualquer pessoa, até de gente famosa.",
             video: M + "deepfake-instrutor.mp4",
-            nota: "Perto da eleição: propaganda eleitoral feita com IA tem de vir com aviso (regra do TSE), para qualquer candidato. Vídeo bombástico e urgente? Confira antes de compartilhar."
+            nota: "Vídeo bombástico e urgente? Confira antes de compartilhar."
           }
         ],
         fazer: {
@@ -73,11 +78,11 @@
           regra: {
             titulo: "A regra contra golpe",
             linhas: ["PRESSA?", "DESLIGA", "LIGA DE VOLTA", "PERGUNTA A PALAVRA"],
-            rodape: "Senha e código: ninguém pede, ninguém dá."
+            rodape: "Ligue de OUTRO telefone, se puder. Senha e código: ninguém pede, ninguém dá."
           },
           dicas: [
-            "Hoje ainda: combine uma palavra secreta com sua família.",
-            "Caiu num golpe de Pix? Avise o banco na hora e peça a contestação no app (MED)."
+            "Combine hoje uma palavra secreta com a família. Ainda sem palavra? Pergunte algo que só a pessoa saberia e que não está na internet.",
+            "Caiu num golpe de Pix? Guarde os prints, avise o banco na hora e peça a contestação no app (MED): você tem até 80 dias."
           ],
           // ids de 04-apps/shared/dados-ferramentas.js (catálogo verificado)
           ferramentas: ["teste-phishing-jigsaw", "which-face-is-real"]
@@ -95,20 +100,23 @@
             comparar: [
               { rotulo: "Pedido vago", pedido: "“Um cachorro.”", imagem: M + "pedido/cachorro-ruim.jpg" },
               { rotulo: "Pedido detalhado", pedido: "“Foto realista de um vira-lata caramelo sentado na frente de uma catedral, numa cidade brasileira, ao pôr do sol.”", imagem: M + "pedido/cachorro-bom.jpg" }
-            ]
+            ],
+            links: [lk("flux-schnell", "FLUX.1 schnell"), lk("bing-image-creator", "Bing Image Creator")]
           },
           {
             titulo: "Uma música em 1 minuto",
             texto: "Letra, voz e instrumentos: tudo criado por IA a partir de uma frase.",
             audio: M + "musica-01.mp3",
             emoji: "🎵",
-            transcricao: "Pedido usado: “Sertanejo alegre sobre a turma da Carreta da Inovação em Londrina numa manhã de sábado.”"
+            transcricao: "Pedido usado: “Sertanejo alegre sobre a turma da Carreta da Inovação em Londrina numa manhã de sábado.”",
+            links: [lk("ai-duet", "AI Duet: toque e a IA responde")]
           },
           {
             titulo: "O que dá pra criar de graça",
             texto: "🖼️ Imagem: descreva e ela desenha.  🎵 Música: diga o estilo e o tema.  🎬 Vídeo curto: descreva a cena.  🗣️ Voz: o texto vira fala.",
             emoji: "🎨",
-            nota: "Cuidado: tudo que você digita vai para uma empresa. Não coloque documento, dado de cliente ou foto de criança."
+            nota: "Cuidado: tudo que você digita vai para uma empresa. Não coloque documento, dado de cliente ou foto de criança.",
+            links: [lk("flux-schnell", "FLUX.1 schnell"), lk("bing-image-creator", "Bing Image Creator"), lk("ai-duet", "AI Duet")]
           }
         ],
         fazer: {
@@ -124,13 +132,13 @@
           regra: {
             titulo: "Pedido de imagem que funciona",
             linhas: ["O QUÊ", "QUE ESTILO", "ONDE", "QUE DETALHES"],
-            rodape: "Ex.: “pintura a óleo de um gato astronauta no espaço, cores vivas”."
+            rodape: "Os 3 primeiros você acabou de praticar. O 4º é o que você digitou no fim: os detalhes."
           },
           dicas: [
             "Vai usar no seu negócio? Leia a licença da ferramenta.",
             "A mesma tecnologia que faz sua música faz a voz falsa do golpe."
           ],
-          ferramentas: ["duck-ai", "bing-image-creator"]
+          ferramentas: ["bing-image-creator", "flux-schnell", "ai-duet"]
         }
       },
 
@@ -151,7 +159,7 @@
           },
           {
             titulo: "Saber PEDIR",
-            texto: "P — Papel: quem ela deve ser.  E — Explique a tarefa.  D — Detalhe o contexto.  I — Indique o formato.  R — Revise: melhore e confira.",
+            texto: "P — Papel: quem ela deve ser.  E — Explique a tarefa.  D — Detalhe o contexto.  I — Indique o formato.  R — Revise: peça de novo e confira.",
             emoji: "✍️",
             nota: "Molde: “Você é ___. Preciso de ___. É para ___. Entregue como ___.”"
           },
@@ -189,26 +197,29 @@
 
       /* =============================================================== */
       incriveis: {
-        descricao: "Coisas que só a IA faz — e como ela \"pensa\" de verdade.",
+        descricao: "Coisas que só a IA faz — e por que ela não pensa: ela chuta a próxima palavra.",
         duracao: "8 min",
         ver: [
           {
             titulo: "Ela aprendeu com milhões de desenhos",
             texto: "No Quick, Draw!, do Google, você desenha e a IA adivinha o que é em 20 segundos. Ela aprendeu vendo desenhos de gente do mundo inteiro.",
             textoSimples: "Você desenha e o computador adivinha o que é. Ele aprendeu vendo muitos desenhos.",
-            emoji: "✏️"
+            emoji: "✏️",
+            links: [lk("quick-draw", "Quick, Draw!")]
           },
           {
             titulo: "Você ensina, ela aprende",
             texto: "Mostre 30 fotos de uma mão fazendo \"joinha\" e o computador aprende a reconhecer. É assim que se ensina uma IA a achar doenças em exames ou reconhecer plantas pelo celular.",
             emoji: "👍",
-            nota: "Isso é o Teachable Machine, do Google: grátis, sem cadastro. Dá pra testar em casa, num computador com câmera."
+            nota: "Isso é o Teachable Machine, do Google: grátis, sem cadastro. Dá pra testar em casa, num computador com câmera.",
+            links: [lk("teachable-machine", "Teachable Machine")]
           },
           {
             titulo: "Já está no seu bolso",
             texto: "Aponte a câmera e descubra o nome da planta. Grave o canto e descubra o pássaro. Converse com alguém de outro idioma. E na ciência, a IA AlphaFold previu a forma de mais de 200 milhões de proteínas — e virou Prêmio Nobel de Química em 2024.",
             textoSimples: "O celular já descobre nome de planta, de passarinho e traduz conversa.",
-            emoji: "🌿"
+            emoji: "🌿",
+            links: [lk("plantnet", "Pl@ntNet")]
           }
         ],
         fazer: {
@@ -223,14 +234,14 @@
           fraseChave: "O computador não sabe — ele chuta a próxima palavra muito bem.",
           regra: {
             titulo: "3 para brincar em casa",
-            linhas: ["Quick, Draw!", "Which Face Is Real", "Pl@ntNet (plantas)"],
+            linhas: [lk("quick-draw", "Quick, Draw!"), lk("which-face-is-real", "Which Face Is Real"), lk("plantnet", "Pl@ntNet (plantas)")],
             rodape: "Grátis. Criança, sempre com um adulto por perto."
           },
           dicas: [
             "Por \"chutar\" palavras, a IA pode inventar. Informação importante: confira."
           ],
           // Mesmos sites da lista "3 para brincar em casa" (Teachable Machine não funciona bem no celular)
-          ferramentas: ["quick-draw", "plantnet"]
+          ferramentas: ["quick-draw", "which-face-is-real", "plantnet"]
         }
       }
     }

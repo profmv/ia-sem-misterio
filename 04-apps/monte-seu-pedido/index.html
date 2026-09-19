@@ -5,13 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Monte seu pedido — IA sem Mistério</title>
   <link rel="stylesheet" href="../shared/estilo.css">
+  <link rel="stylesheet" href="../shared/animacoes.css">
   <style>
     main.conteudo { padding-top: 14px; padding-bottom: 14px; }
     .balao {
       background: var(--superficie); border: 3px solid var(--cor); border-radius: 22px; padding: 14px 22px;
       font-size: 1.45rem; font-weight: 700; min-height: 2.6em; position: relative; margin-bottom: 14px;
     }
-    .balao::before { content: "✍️ Seu pedido para a IA:"; display: block; font-size: .8rem; font-weight: 800; color: var(--cor); text-transform: uppercase; letter-spacing: .06em; }
+    .balao::before { content: "Seu pedido para a IA:"; display: block; font-size: .8rem; font-weight: 800; color: var(--cor); text-transform: uppercase; letter-spacing: .06em; }
     .balao .vazio { color: var(--texto-suave); font-weight: 400; }
     .balao .parte { border-radius: 8px; padding: 0 4px; }
     .balao .p-estilo  { background: #FFE9B3; }
@@ -43,6 +44,42 @@
     .comparar figure.escolhida img { outline: 6px solid var(--destaque); }
 
     @media (max-width: 900px) { .opcoes, .comparar, .resultado { grid-template-columns: 1fr; } }
+
+    /* ---------- Tela final: gerador de imagem de verdade (precisa de internet) ---------- */
+    .rotulo-campo { display: block; font-weight: 800; font-size: 1.05rem; }
+    #campo-pedido {
+      width: 100%; font: inherit; font-size: 1.05rem; line-height: 1.4; margin-top: 8px; padding: 12px 14px;
+      background: var(--superficie); color: var(--texto); border: 3px solid var(--borda); border-radius: var(--raio-peq); resize: vertical;
+    }
+    #campo-pedido:focus { border-color: var(--cor); }
+    #campo-pedido:focus-visible { outline: 4px solid var(--destaque); outline-offset: 2px; }
+
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+    .chip {
+      font: inherit; font-weight: 700; font-size: .95rem; cursor: pointer; min-height: 48px; padding: 8px 18px;
+      background: var(--superficie); color: var(--texto); border: 3px solid var(--borda); border-radius: 999px;
+    }
+    .chip:hover { border-color: var(--cor); }
+    .chip[aria-pressed="true"] { background: var(--cor-clara); border-color: var(--cor); color: var(--cor); }
+    .chip:focus-visible { outline: 4px solid var(--destaque); outline-offset: 3px; }
+
+    .aviso-privacidade {
+      margin: 12px 0; padding: 10px 14px; font-size: .9rem;
+      background: #FFF8E1; border: 3px solid var(--destaque); border-radius: var(--raio-peq);
+    }
+    .estado-gerador { min-height: 1.5em; margin: 10px 0 0; font-weight: 700; }
+    .estado-gerador.espera { color: var(--texto-suave); }
+    .estado-gerador.erro   { color: var(--errado); }
+    .estado-gerador.ok     { color: var(--certo); }
+
+    .area-imagem { margin-top: 12px; }
+    .area-imagem img { display: block; width: auto; max-width: 100%; max-height: 40vh; margin: 0 auto; border-radius: 18px; background: #fff; box-shadow: var(--sombra); }
+    .credito { font-size: .8rem; color: var(--texto-suave); }
+    .legenda { margin: 8px 0 0; font-size: .95rem; font-weight: 700; color: var(--texto-suave); text-align: center; }
+
+    #tela-celular .qr-celular { padding: 12px; gap: 12px; font-size: .85rem; }
+    #tela-celular .qr-celular .url { font-size: .95rem; }
+    #tela-celular .alerta-lista li { padding: 8px 0 8px 40px; font-size: .95rem; }
   </style>
 </head>
 <body class="t-generativa">
@@ -109,20 +146,43 @@
 
     <!-- NO CELULAR + FIM -->
     <section class="tela" id="tela-celular">
-      <h2>Agora é com você, no seu celular 📱</h2>
+      <h2>Agora é com você</h2>
       <div class="grade g2" style="align-items: start;">
         <div>
-          <div class="balao" id="balao-celular"></div>
-          <ul class="alerta-lista dicas">
+          <label class="rotulo-campo" for="campo-pedido">Escreva seu pedido e a IA cria a imagem na hora</label>
+          <textarea id="campo-pedido" rows="3" maxlength="300" placeholder="Ex.: um cachorro caramelo numa praia ensolarada"></textarea>
+          <div class="chips" id="chips-estilo" role="group" aria-label="Estilo da imagem"></div>
+          <p class="aviso-privacidade">
+            O que você escreve sai deste computador: vai para o tradutor do Google e para serviços gratuitos
+            de imagem na internet (Pollinations ou AI Horde), que criam a figura.
+            Não escreva nome, telefone nem endereço. Criança: peça sempre com um adulto do lado.
+          </p>
+          <div class="linha">
+            <button class="btn cor grande" id="btn-gerar" type="button" data-som="nenhum">Gerar imagem</button>
+            <button class="btn claro oculto" id="btn-cancelar" type="button">Cancelar</button>
+          </div>
+          <p class="estado-gerador" id="estado-gerador" role="status" aria-live="polite"></p>
+          <div class="area-imagem oculto" id="area-imagem">
+            <img id="img-gerada" alt="">
+            <p class="legenda oculto" id="legenda-imagem"></p>
+            <div class="linha" style="margin-top: 10px;">
+              <button class="btn claro" id="btn-outra" type="button" data-som="nenhum">Gerar outra</button>
+              <span class="credito" id="credito-imagem">Imagem criada por IA</span>
+            </div>
+          </div>
+          <ul class="alerta-lista dicas" style="margin-top: 14px;">
             <li>Digite o pedido do seu jeito. Pode inventar!</li>
             <li>Não gostou? Peça: “mais colorido”, “de noite”, “estilo desenho”.</li>
           </ul>
-          <ul class="alerta-lista">
+        </div>
+        <div>
+          <h3>Ou use estes sites</h3>
+          <div class="grade" id="qrs" style="gap: 12px;"></div>
+          <ul class="alerta-lista" style="margin-top: 14px;">
             <li>Não envie foto de outras pessoas nem de crianças.</li>
             <li>A mesma tecnologia faz foto falsa para golpe. Foto não é prova.</li>
           </ul>
         </div>
-        <div class="grade" id="qrs" style="gap: 12px;"></div>
       </div>
       <div class="linha" style="justify-content: space-between; margin-top: 16px;">
         <button class="btn claro" id="btn-voltar-comparar" type="button">← Voltar</button>
@@ -133,8 +193,10 @@
   </main>
 
   <script src="../shared/config.js"></script>
+  <script src="../shared/icones.js"></script>
   <script src="../shared/qrcode.js"></script>
   <script src="../shared/util.js"></script>
+  <script src="../shared/efeitos.js"></script>
   <script src="../shared/dados-ferramentas.js"></script>
   <script src="img/imagens.dados.js"></script>
   <script src="app.js"></script>

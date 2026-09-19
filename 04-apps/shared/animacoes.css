@@ -1,0 +1,220 @@
+/* =====================================================================
+   IA sem Mistério — animações compartilhadas (carregar DEPOIS de estilo.css)
+
+   Regras de ouro
+   - Só opacity, transform, box-shadow e filter: nenhuma animação muda o layout (sem CLS).
+   - NUNCA transform/filter em body, html ou ancestrais de elementos position:fixed
+     (o movimento vale só para blocos internos; body/html usam apenas opacity).
+   - prefers-reduced-motion: reduce desliga TUDO que está aqui (o conteúdo aparece de imediato).
+   - Preenchimento "backwards" (e não "both"): depois de acabar, a animação larga o elemento,
+     e o :hover/transform do próprio elemento continua funcionando.
+
+   ---------------------------------------------------------------------
+   CLASSES QUE PODEM SER USADAS NO HTML
+   ---------------------------------------------------------------------
+   Entrada de blocos (fade + movimento). O atraso vai em --atraso:
+     .entra        sobe 12 px + fade, .6 s        <div class="entra" style="--atraso:.8s">
+     .entra-esq    entra da esquerda (-28 px)
+     .entra-dir    entra da direita  (+28 px)
+     .entra-pop    escala .92 → 1 com leve "salto" (bom para QR, selos, números)
+     .entra-seq    no CONTÊINER: cada filho direto entra em sequência (.15 s entre um e outro,
+                   até o 8º; --atraso no contêiner atrasa o conjunto todo)
+                   <div class="entra-seq" style="--atraso:.3s"> <div>1</div> <div>2</div> … </div>
+
+   Setas e links de interesse:
+     .seta-pulsa          seta que pulsa (desloca, cresce e brilha) — texto ("↗", "→") ou <svg class="ico-svg">
+       .seta-pulsa.horiz  desloca na horizontal (para "→")   ·  .seta-pulsa.forte  com halo na cor do texto
+     .link-chama          no <a> inteiro: brilho suave pulsando; a .seta-pulsa de dentro acelera no hover/foco
+       <a class="link-site link-chama" href="…">Abrir <svg class="ico-svg …"></svg> <span class="seta-pulsa">↗</span></a>
+
+   Botões:
+     AUTOMÁTICO (sem mexer no HTML): .btn.destaque, .btn.grande, .btn.cor.grande ganham brilho que
+     varre o botão, pulsar do halo e efeito no hover/clique. NÃO ganham: .btn.claro, [disabled],
+     [aria-disabled="true"] e botões dentro de .opcao.
+     .btn-chama           opt-in, mais forte (brilho a cada 2,2 s): use no "Próximo/Continuar" do fim de etapa
+                          (vale também com .claro)
+
+   Só para slides.html: o .palco ganha .sem-anim no passo de "revelar" (não reanima).
+   ===================================================================== */
+
+:root {
+  --anim-suave: cubic-bezier(.22, .8, .3, 1);   /* freia no fim, sem "tranco" */
+  --anim-pop: cubic-bezier(.34, 1.4, .64, 1);   /* leve ultrapassagem */
+}
+
+/* ---------- 1. Entrada da página: fade só com opacity ---------- */
+
+body { animation: an-pagina .5s ease-out; }
+@keyframes an-pagina { from { opacity: 0; } to { opacity: 1; } }
+
+/* ---------- 2. Telas dos apps/portal (<section class="tela">) ---------- */
+
+/* A tela entra com fade + leve subida; os filhos diretos escalonam (até o 8º).
+   Só roda quando a tela passa de oculta a visível (mostrarTela troca .ativa), e não a cada
+   clique dentro dela. #tela-ocioso (fixa, com filhos fixos e animação própria) fica de fora. */
+.tela.ativa:not(#tela-ocioso) { animation: an-tela .45s var(--anim-suave) backwards; }
+@keyframes an-tela { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+/* :where() zera a especificidade: qualquer classe da página (.entra, animação própria) vence. */
+:where(.tela.ativa:not(#tela-ocioso)) > * { animation: an-filho .4s var(--anim-suave) backwards; }
+:where(.tela.ativa:not(#tela-ocioso)) > :nth-child(2) { animation-delay: .05s; }
+:where(.tela.ativa:not(#tela-ocioso)) > :nth-child(3) { animation-delay: .10s; }
+:where(.tela.ativa:not(#tela-ocioso)) > :nth-child(4) { animation-delay: .15s; }
+:where(.tela.ativa:not(#tela-ocioso)) > :nth-child(5) { animation-delay: .20s; }
+:where(.tela.ativa:not(#tela-ocioso)) > :nth-child(6) { animation-delay: .25s; }
+:where(.tela.ativa:not(#tela-ocioso)) > :nth-child(7) { animation-delay: .30s; }
+:where(.tela.ativa:not(#tela-ocioso)) > :nth-child(n+8) { animation-delay: .35s; }
+@keyframes an-filho { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+
+/* Portal: a etapa (#trilha-corpo) é redesenhada a cada "Próximo/Voltar". Só um fade curto, SEM
+   movimento e sem atraso: troca de etapa suave, sem pular. (Cliques dentro da etapa, como
+   "Ver a resposta", não redesenham e por isso não reanimam.) Com :where() a especificidade é zero:
+   um filho que use .entra (ou animação própria) ganha deste fade. */
+:where(#trilha-corpo) > * { animation: an-fade .3s ease-out backwards; }
+@keyframes an-fade { from { opacity: 0; } to { opacity: 1; } }
+
+/* ---------- 3. Slides (05-apresentacao/slides.html) ---------- */
+
+/* A cada slide novo: título → conteúdo → legenda entram com fade curto. O .palco (position:fixed)
+   não é animado, só os filhos. A caixa .revelar-slide mantém a animação "surgir" da própria página. */
+#raiz > .palco > :not(.revelar-slide) { animation: an-slide .4s ease-out backwards; }
+#raiz > .palco > :nth-child(2):not(.revelar-slide) { animation-delay: .10s; }
+#raiz > .palco > :nth-child(3):not(.revelar-slide) { animation-delay: .20s; }
+#raiz > .palco > :nth-child(n+4):not(.revelar-slide) { animation-delay: .30s; }
+@keyframes an-slide { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+/* Passo de "revelar" (mesmo slide redesenhado): nada reanima */
+#raiz > .palco.sem-anim > :not(.revelar-slide) { animation: none !important; }
+
+/* ---------- 4. Botões de interesse ---------- */
+
+/* Cor do halo de cada botão (baixa especificidade: as variantes abaixo vencem) */
+.btn { --halo: var(--texto); }
+.btn.destaque { --halo: var(--destaque); }
+.btn.cor { --halo: var(--cor, var(--texto)); }
+.btn.certo { --halo: var(--certo); }
+.btn.errado { --halo: var(--errado); }
+
+/* Alvo: .btn.destaque / .btn.grande (menos .claro) e .btn-chama (opt-in), sem [disabled] nem .opcao.
+   O :where() mantém a especificidade em (0,1,0) = mesma do .btn de estilo.css (esta folha vem depois). */
+.btn:where(.destaque:not(.claro), .grande:not(.claro), .btn-chama):where(:not([disabled], [aria-disabled="true"], .opcao *)) {
+  position: relative;
+  overflow: hidden;            /* recorta o brilho no formato de pílula */
+  isolation: isolate;
+  --halo-a: color-mix(in srgb, var(--halo) 55%, transparent);
+  --halo-b: color-mix(in srgb, var(--halo) 85%, transparent);
+  animation: an-halo 2s ease-in-out infinite;
+  transition: transform .2s var(--anim-pop), filter .12s;
+}
+@keyframes an-halo {
+  0%        { box-shadow: 0 0 0 0 var(--halo-a); }
+  70%, 100% { box-shadow: 0 0 0 12px transparent; }
+}
+
+/* Brilho que varre o botão da esquerda para a direita (~.95 s de varredura a cada 3,2 s) */
+.btn:where(.destaque:not(.claro), .grande:not(.claro), .btn-chama):where(:not([disabled], [aria-disabled="true"], .opcao *))::after {
+  content: "";
+  position: absolute; top: 0; bottom: 0; left: 0; width: 42%;
+  background: linear-gradient(100deg, transparent 0%, rgba(255, 255, 255, .5) 50%, transparent 100%);
+  transform: translateX(-140%) skewX(-18deg);
+  animation: an-brilho 3.2s ease-in-out infinite;
+  pointer-events: none;
+  z-index: -1;                 /* atrás do texto (o botão é um contexto isolado): o rótulo nunca perde contraste */
+}
+@keyframes an-brilho {
+  0%        { transform: translateX(-140%) skewX(-18deg); }
+  30%, 100% { transform: translateX(340%) skewX(-18deg); }
+}
+
+/* Hover/foco por ponteiro: sobe 2 px, cresce 3% e o halo fica mais forte; clique afunda */
+.btn:where(.destaque:not(.claro), .grande:not(.claro), .btn-chama):where(:not([disabled], [aria-disabled="true"], .opcao *)):hover {
+  transform: translateY(-2px) scale(1.03);
+  animation: an-halo-forte 1.1s ease-out infinite;
+}
+@keyframes an-halo-forte {
+  0%        { box-shadow: 0 0 0 0 var(--halo-b); }
+  75%, 100% { box-shadow: 0 0 0 18px transparent; }
+}
+.btn:where(.destaque:not(.claro), .grande:not(.claro), .btn-chama):where(:not([disabled], [aria-disabled="true"], .opcao *)):active {
+  transform: scale(.97);
+}
+/* O anel de foco de estilo.css (.btn:focus-visible) continua valendo: o outline não é recortado
+   pelo overflow do próprio botão. */
+
+/* .btn-chama (opt-in): mais insistente — brilho a cada 2,2 s e halo mais rápido */
+.btn.btn-chama { animation-duration: 1.6s; }
+.btn.btn-chama::after { animation-duration: 2.2s; }
+.btn.btn-chama:hover { animation-duration: 1.1s; }
+
+/* ---------- 5. Setas e links de interesse ---------- */
+
+/* Vale para texto ("↗", "→") e para <svg class="ico-svg"> (o svg já é inline-block em icones.js) */
+.seta-pulsa {
+  display: inline-block;
+  --seta-dx: 3px; --seta-dy: -3px;             /* diagonal ↗ (padrão) */
+  animation: an-seta 1.4s ease-in-out infinite;
+}
+.seta-pulsa.horiz { --seta-dx: 4px; --seta-dy: 0px; }
+@keyframes an-seta {
+  0%, 100% { transform: translate(0, 0) scale(1); opacity: .65; }
+  50%      { transform: translate(var(--seta-dx), var(--seta-dy)) scale(1.18); opacity: 1; }
+}
+/* Com halo (na cor do texto/ícone) */
+.seta-pulsa.forte { animation-name: an-seta-forte; }
+@keyframes an-seta-forte {
+  0%, 100% { transform: translate(0, 0) scale(1); opacity: .65; filter: drop-shadow(0 0 0 currentColor); }
+  50%      { transform: translate(var(--seta-dx), var(--seta-dy)) scale(1.18); opacity: 1; filter: drop-shadow(0 0 5px currentColor); }
+}
+
+/* Link inteiro: brilho suave na cor do link (.link-site usa --cor da trilha) */
+.link-chama {
+  --halo: var(--cor, var(--link));
+  animation: an-link 2.6s ease-in-out infinite;
+}
+@keyframes an-link {
+  0%, 100% { box-shadow: 0 0 0 0 transparent; }
+  50%      { box-shadow: 0 0 0 6px color-mix(in srgb, var(--halo) 30%, transparent); }
+}
+.link-chama:hover, .link-chama:focus-visible { animation-duration: 1.3s; }
+.link-chama:hover .seta-pulsa, .link-chama:focus-visible .seta-pulsa,
+.btn-chama:hover .seta-pulsa, .btn-chama:focus-visible .seta-pulsa { animation-duration: .7s; }
+
+/* ---------- 6. Entrada de blocos (utilitários) ---------- */
+/* Ficam no FIM do arquivo de propósito: com a mesma especificidade, ganham dos atrasos escalonados
+   das telas; o atraso escolhido em --atraso é respeitado. */
+
+.entra     { animation: an-sobe .6s var(--anim-suave) var(--atraso, 0s) backwards; }
+.entra-esq { animation: an-esq  .6s var(--anim-suave) var(--atraso, 0s) backwards; }
+.entra-dir { animation: an-dir  .6s var(--anim-suave) var(--atraso, 0s) backwards; }
+.entra-pop { animation: an-pop  .6s var(--anim-pop)   var(--atraso, 0s) backwards; }
+@keyframes an-sobe { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+@keyframes an-esq  { from { opacity: 0; transform: translateX(-28px); } to { opacity: 1; transform: none; } }
+@keyframes an-dir  { from { opacity: 0; transform: translateX(28px); }  to { opacity: 1; transform: none; } }
+@keyframes an-pop  { from { opacity: 0; transform: scale(.92); }        to { opacity: 1; transform: none; } }
+
+/* Sequência automática: cada filho direto vira um .entra, .15 s depois do anterior (até o 8º) */
+.entra-seq > * { --i: 0; animation: an-sobe .6s var(--anim-suave) calc(var(--atraso, 0s) + var(--i) * .15s) backwards; }
+.entra-seq > :nth-child(2) { --i: 1; }
+.entra-seq > :nth-child(3) { --i: 2; }
+.entra-seq > :nth-child(4) { --i: 3; }
+.entra-seq > :nth-child(5) { --i: 4; }
+.entra-seq > :nth-child(6) { --i: 5; }
+.entra-seq > :nth-child(7) { --i: 6; }
+.entra-seq > :nth-child(n+8) { --i: 7; }
+
+/* ---------- 7. Movimento reduzido: desliga tudo o que é novo ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  body,
+  .tela.ativa, :where(.tela.ativa) > *, #trilha-corpo > *,
+  #raiz > .palco > *,
+  .btn, .btn::after,
+  .seta-pulsa, .seta-pulsa.forte, .link-chama,
+  .entra, .entra-esq, .entra-dir, .entra-pop, .entra-seq > * {
+    animation: none !important;
+    transition: none !important;
+  }
+  .btn:where(.destaque, .grande, .btn-chama)::after { display: none !important; }   /* sem o brilho que varre */
+  .btn:where(.destaque, .grande, .btn-chama):hover,
+  .btn:where(.destaque, .grande, .btn-chama):active { transform: none !important; } /* sem sobe/cresce/afunda */
+  .seta-pulsa { opacity: 1 !important; }
+}

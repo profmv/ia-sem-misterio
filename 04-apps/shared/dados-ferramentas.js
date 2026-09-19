@@ -780,7 +780,7 @@ window.FERRAMENTAS = [
   },
   {
     "id": "chatgpt-sem-login",
-    "nome": "ChatGPT sem login",
+    "nome": "ChatGPT",
     "url": "https://chatgpt.com/",
     "trilha": "produtividade",
     "categoria": "texto",
@@ -1374,6 +1374,90 @@ window.FERRAMENTAS = [
     "top": false,
     "onde": "celular-do-visitante",
     "verificado_em": "2026-09-16",
+    "confianca": "media"
+  }
+  ,{
+    "id": "flux-schnell",
+    "nome": "FLUX.1 schnell (Hugging Face)",
+    "url": "https://huggingface.co/spaces/black-forest-labs/FLUX.1-schnell",
+    "trilha": "generativa",
+    "categoria": "imagem",
+    "login": "nao",
+    "custo": "gratis-com-limite",
+    "ptbr": false,
+    "celular": true,
+    "descricao": "Descreva a imagem e a IA cria em poucos segundos. Site em inglês, sem cadastro; pode ter fila e limite por dia.",
+    "demo": [
+      "Abra o link e escreva o pedido na caixa 'Prompt' (português ou inglês).",
+      "Clique em 'Run' e espere alguns segundos.",
+      "Troque UM detalhe do pedido (estilo, lugar ou luz) e gere de novo para comparar."
+    ],
+    "exemplo": "Uma capivara com capacete de astronauta tomando café, estilo desenho animado, cores vivas",
+    "cuidado": "Interface em inglês. Sem conta há limite diário e pode haver fila (mensagem sobre GPU/quota). Não envie foto de pessoas nem escreva dados pessoais.",
+    "alternativa": "bing-image-creator",
+    "top": false,
+    "onde": "visitante",
+    "verificado_em": "2026-09-19",
+    "confianca": "baixa"
+  }
+  ,{
+    "id": "pollinations-imagens",
+    "nome": "Pollinations (gerador de imagens)",
+    "url": "https://pollinations.ai/",
+    "trilha": "generativa",
+    "categoria": "imagem",
+    "login": "nao",
+    "custo": "gratis-com-limite",
+    "ptbr": false,
+    "celular": true,
+    "descricao": "Serviço gratuito que cria imagens a partir de texto. Usado pela tela final do 'Monte seu pedido'.",
+    "demo": [],
+    "exemplo": "",
+    "cuidado": "O texto do pedido é enviado a esse serviço. Sem chave, o limite é por IP e costuma dar erro ou fila (visto em 19/09/2026); por isso o app tenta outro serviço. Pode gravar uma marca pequena no canto da imagem.",
+    "alternativa": "ai-horde",
+    "top": false,
+    "onde": "visitante",
+    "verificado_em": "2026-09-19",
+    "confianca": "media"
+  }
+  ,{
+    "id": "ai-horde",
+    "nome": "AI Horde (imagens colaborativas)",
+    "url": "https://aihorde.net/",
+    "trilha": "generativa",
+    "categoria": "imagem",
+    "login": "nao",
+    "custo": "gratis-com-limite",
+    "ptbr": false,
+    "celular": true,
+    "descricao": "Rede voluntária de computadores que criam imagens de graça. Segundo serviço usado pela tela final do 'Monte seu pedido'.",
+    "demo": [],
+    "exemplo": "",
+    "cuidado": "O texto do pedido passa por computadores de voluntários; há filtro de conteúdo impróprio, mas não é garantido. Sem conta a fila pode levar de segundos a minutos.",
+    "alternativa": "pollinations-imagens",
+    "top": false,
+    "onde": "visitante",
+    "verificado_em": "2026-09-19",
+    "confianca": "media"
+  }
+  ,{
+    "id": "google-tradutor-gtx",
+    "nome": "Google Tradutor (endpoint não oficial)",
+    "url": "https://translate.google.com/",
+    "trilha": "generativa",
+    "categoria": "texto",
+    "login": "nao",
+    "custo": "gratis",
+    "ptbr": true,
+    "celular": true,
+    "descricao": "Usado pela tela final do 'Monte seu pedido' para traduzir o pedido do português para o inglês antes de gerar a imagem.",
+    "demo": [],
+    "exemplo": "",
+    "cuidado": "O texto do pedido é enviado ao Google. Endereço não oficial (client=gtx): pode parar de funcionar; nesse caso o app usa o texto original.",
+    "alternativa": "",
+    "top": false,
+    "onde": "visitante",
+    "verificado_em": "2026-09-19",
     "confianca": "media"
   }
 ];

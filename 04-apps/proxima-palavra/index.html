@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Próxima Palavra — Como a IA escreve</title>
   <link rel="stylesheet" href="../shared/estilo.css">
+  <link rel="stylesheet" href="../shared/animacoes.css">
   <style>
     .frase-jogo { font-size: 2.3rem; font-weight: 800; line-height: 1.25; margin: 10px 0 24px; }
     .frase-jogo .lacuna { display: inline-block; min-width: 4ch; border-bottom: 6px solid var(--cor); color: var(--cor); }
@@ -72,7 +73,7 @@
       <div class="barras-opcoes" id="opcoes-adivinhe"></div>
       <div id="comentario-adivinhe" class="feedback certo oculto"></div>
       <div class="linha" style="justify-content: flex-end; margin-top: 16px;">
-        <button class="btn cor grande oculto" id="btn-proxima-rodada">Próxima ▶</button>
+        <button class="btn cor grande oculto" id="btn-proxima-rodada" data-som="passo">Próxima ▶</button>
       </div>
     </section>
 
@@ -123,7 +124,7 @@
       <p id="instrucao-invencao" style="font-weight:700; margin: 18px 0 8px;"></p>
       <div class="barras-opcoes" id="opcoes-invencao"></div>
       <div class="linha" style="justify-content: flex-end; margin-top: 16px;">
-        <button class="btn cor grande oculto" id="btn-proxima-palavra">Próxima palavra ▶</button>
+        <button class="btn cor grande oculto" id="btn-proxima-palavra" data-som="passo">Próxima palavra ▶</button>
       </div>
       <div id="revelacao" class="feedback errado oculto">
         <div class="titulo">😱 Pegadinha!</div>
@@ -155,7 +156,9 @@
   </main>
 
   <script src="../shared/config.js"></script>
+  <script src="../shared/icones.js"></script>
   <script src="../shared/util.js"></script>
+  <script src="../shared/efeitos.js"></script>
   <script src="dados-proxima-palavra.js"></script>
   <script src="app.js"></script>
 </body>

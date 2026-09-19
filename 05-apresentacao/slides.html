@@ -6,6 +6,7 @@
   <title>Tópicos — IA sem Mistério</title>
   <link rel="icon" href="data:,">
   <link rel="stylesheet" href="../04-apps/shared/estilo.css">
+  <link rel="stylesheet" href="../04-apps/shared/animacoes.css">
   <style>
     html, body { height: 100%; }
     body { margin: 0; background: #101216; color: #fff; overflow: hidden; font-size: 20px; }
@@ -60,6 +61,7 @@
     .notas { position: fixed; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,.92); border-top: 4px solid var(--destaque); padding: 14px 5vw 18px; font-size: 22px; line-height: 1.4; z-index: 20; max-height: 40vh; overflow: auto; }
     .notas .meta { color: var(--destaque); font-weight: 800; margin-bottom: 6px; }
 
+    .btn-som { display: none !important; }   /* no telão não há botão de som (Ctrl+M não existe: use ?som=0 na URL para silenciar) */
     .lista-shows { max-width: 900px; margin: 8vh auto; padding: 0 24px; }
   </style>
 </head>
@@ -67,8 +69,10 @@
   <div id="raiz"></div>
 
   <script src="../04-apps/shared/config.js"></script>
+  <script src="../04-apps/shared/icones.js"></script>
   <script src="../04-apps/shared/qrcode.js"></script>
   <script src="../04-apps/shared/util.js"></script>
+  <script src="../04-apps/shared/efeitos.js"></script>
   <script src="shows.dados.js"></script>
   <script>
   (function () {
@@ -112,7 +116,7 @@
     document.body.className = trilha.classe || "";
     document.title = "Tópico " + idShow + " — " + show.titulo;
 
-    var atual = 0, passoRevelar = false, notasVisiveis = false, inicioShow = null;
+    var atual = 0, passoRevelar = false, notasVisiveis = false, inicioShow = null, telaAnimada = -1;
     var audioAtual = null;
 
     function imagemOuFalta(src) {
@@ -130,7 +134,9 @@
       pararMidia();
       raiz.innerHTML = "";
       var t = show.telas[atual];
-      var palco = el("div", { class: "palco" });
+      // Só o slide NOVO anima a entrada (animacoes.css). Redesenhar o mesmo slide (passo de "revelar") não reanima.
+      var palco = el("div", { class: "palco" + (atual === telaAnimada ? " sem-anim" : "") });
+      telaAnimada = atual;
       raiz.appendChild(el("div", { class: "faixa-topo" }));
       raiz.appendChild(palco);
 
@@ -148,7 +154,7 @@
       } else if (t.tipo === "audio") {
         var audio = new Audio(t.midia);
         var falta = false;
-        var btn = el("button", { class: "botao-som", type: "button", title: "Tocar (Enter)" }, ["▶"]);
+        var btn = el("button", { class: "botao-som", type: "button", title: "Tocar (Enter)", "data-som": "nenhum" }, ["▶"]);
         var area = el("div", { class: "midia-area", style: "flex-direction:column" }, [btn]);
         var transc = t.transcricao ? el("div", { class: "transcricao-slide" + (t.mostrarTranscricao ? "" : " oculto") }, [t.mostrarTranscricao ? t.transcricao : "“" + t.transcricao.replace(/^[“"]|[”"]$/g, "") + "”"]) : null;
         if (transc) area.appendChild(transc);
@@ -247,7 +253,7 @@
     function avancar() {
       if (!inicioShow) inicioShow = Date.now();
       var t = show.telas[atual];
-      if (t.revelar && !passoRevelar) { passoRevelar = true; desenhar(); return; }
+      if (t.revelar && !passoRevelar) { passoRevelar = true; desenhar(); if (window.IA && IA.som) IA.som("revela"); return; }
       if (atual < show.telas.length - 1) { atual++; passoRevelar = false; desenhar(); }
     }
     function voltar() {

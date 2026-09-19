@@ -1,6 +1,6 @@
 /*
  * DADOS DAS TELAS DOS 4 TÓPICOS — lidos por 05-apresentacao/slides.html (abrir slides.html?show=1 … ?show=4; o parâmetro continua se chamando show).
- * Ordem oficial (plano-mestre 4.1): 10:15 tópico 1 · 10:45 tópico 2 · 11:15 tópico 3 · 11:45 tópico 4 · 12:15 tópico 1 (bis).
+ * Ordem oficial (plano-mestre 4.1): tópico 1 · tópico 2 · tópico 3 · tópico 4 · tópico 1 (bis). Sem horários fixos.
  * Roteiros literais: 02-roteiros/02-show-1-golpes.md … 05-show-4-impossivel.md (arquivos mantêm o nome antigo).
  * Caminhos de mídia relativos a 05-apresentacao/. Lista completa: midia/LISTA-DE-MIDIA.md.
  * Tipos: audio, video, imagens, frase, regra, comparar, chamada. Máx. 6 telas por tópico.
@@ -27,7 +27,7 @@ window.SHOWS = {
         tipo: "frase",
         titulo: "Pressa + segredo + dinheiro",
         texto: "A receita é velha. A IA só deixou barato.",
-        notas: "Pergunta: 'quais são os três ingredientes?' Se ninguém: 'pressa'. Número: 258 golpes por hora no Brasil (Anuário FBSP 2026). 'Segundo uma empresa de segurança', quase metade das fraudes financeiras já usa IA (VU, 15/09/2026 — dado privado)."
+        notas: "Pergunta: 'quais são os três ingredientes?' Se ninguém: 'pressa'. Número: 258 golpes por hora no Brasil, um a cada 14 segundos (Anuário FBSP 2026). 'Segundo uma empresa de segurança', mais de 40% das fraudes financeiras já usam alguma IA e o golpe com deepfake cresceu 830% — hoje é 1 em cada 15 (VU, 15/09/2026 — dado privado)."
       },
       {
         tipo: "imagens",
@@ -50,20 +50,20 @@ window.SHOWS = {
         midia: "midia/deepfake-instrutor.mp4",
         legenda: "SIMULAÇÃO",
         alternativa: ["Uma foto sua.", "Um minuto da sua voz.", "Um vídeo dizendo o que você nunca disse."],
-        notas: "20 s. Olha o público, não a tela. Casos com fonte: Gisele/kit anti-rugas (CNN, 2025); Mion/Outback (Correio Braziliense, 2025); médicos falsos (NetLab/UFRJ). Eleição: só a regra — vídeo bombástico + urgência = confere; propaganda com IA tem aviso, golpista não põe. ZERO nome de candidato. Plano B: midia/deepfake-print.jpg."
+        notas: "10 s, gerado no Google Flow: o instrutor 'fala' \"Eu vi um disco voador há minutos atrás. Você acredita em mim?\" (piada inofensiva de disco voador, com o selo \"SIMULAÇÃO — vídeo feito com IA\" queimado). Serve para mostrar 'esse sou eu, eu nunca disse isso'. Olha o público, não a tela. Casos com fonte: Gisele/kit anti-rugas (CNN, 2025); Mion/Outback (Correio Braziliense, 2025); médicos falsos (NetLab/UFRJ). Vídeo bombástico + urgência = confere antes de passar adiante. Plano B: midia/deepfake-print.jpg."
       },
       {
         tipo: "regra",
         titulo: "A regra",
         linhas: ["PRESSA?", "DESLIGA", "LIGA DE VOLTA", "PERGUNTA A PALAVRA"],
-        rodape: "Senha e código: ninguém pede, ninguém dá.",
-        notas: "Ler junto, apontando. Desliga = no WhatsApp, para de responder. Liga de volta = número da agenda / atrás do cartão. 'Combinem a palavra no almoço.' Depois, quiz A/B pelo Explorador: voz-real.mp3 × voz-clonada-neutra.mp3 (no bis, inverte). 'Muita gente erra; regra, não ouvido.' MED: app do banco, 'contestar Pix', até 80 dias contados do Pix, quanto antes melhor; guarda prints."
+        rodape: "Ligue de outro telefone. Senha e código: ninguém pede, ninguém dá.",
+        notas: "Ler junto, apontando. Desliga = no WhatsApp, para de responder. Liga de volta = número da agenda / o que está atrás do cartão do banco — e, se puder, de OUTRO telefone: no golpe do motoboy o criminoso não desliga a linha e quem 'liga de volta' cai nele. 'Combinem a palavra no almoço; quem não tem palavra, pergunta algo que só a pessoa saberia e que não está na internet.' Quiz A/B de voz SÓ se existir voz-real.mp3 (sua gravação real) × voz-clonada-neutra.mp3 (clone da SUA voz); sem isso, pule o quiz. Nunca peça palmas a quem acertou: 'Quem acertou, acertou no chute — metade da sala acertaria no cara ou coroa. Por isso a defesa não é o ouvido, é a regra.' MED: app do banco, 'contestar Pix', até 80 dias contados do Pix, quanto antes melhor; guarda prints."
       },
       {
         tipo: "chamada",
         titulo: "Leve para casa",
         texto: "Foto não é prova. Voz não é prova. Regra é prova.",
-        notas: "Cartão na saída (regra na frente, PEDIR atrás). QR = material + aula gratuita [DIA], só quem quiser; ninguém entra em grupo. 'Senta num computador vermelho: Golpe ou seguro?' Próximo tópico 10:45 (no bis: 'último tópico; PCs abertos até 12:30')."
+        notas: "QR = material + aula gratuita [DIA], só quem quiser; ninguém entra em grupo. 'Senta num computador vermelho: Golpe ou seguro?' Anuncie o próximo tópico, sem dizer horário (no bis: 'último tópico; os PCs continuam abertos')."
       }
     ]
   },
@@ -88,7 +88,7 @@ window.SHOWS = {
           "midia/pedido/galeria-gato-astronauta.jpg"
         ],
         legenda: "Segundos cada. Grátis. Pedido escrito em português.",
-        notas: "Aponta uma a uma: cartão de aniversário, logo de pastelaria inventada, bonde numa rua à noite, gato astronauta (tipo de pedido que criança adora). 'Não é código, é português.' Sites grátis no material do QR do cartão. Também música, voz e vídeo — 'quem viu o tópico anterior me viu dizendo o que nunca disse'."
+        notas: "Aponta uma a uma: cartão de aniversário, logo de pastelaria inventada, bonde numa rua à noite, gato astronauta (tipo de pedido que criança adora). 'Não é código, é português.' Sites grátis no material do QR. Também música, voz e vídeo — 'quem viu o tópico anterior me viu dizendo o que nunca disse'."
       },
       {
         tipo: "comparar",
@@ -121,14 +121,14 @@ window.SHOWS = {
         titulo: "A música de vocês",
         midia: "midia/musica-01.mp3",
         mostrarTranscricao: true,
-        transcricao: "LETRA_MUSICA_PLACEHOLDER",
+        transcricao: "Sábado de manhã lá no centro de Londrina,\nA carreta da inovação chegou na esquina.\nA turma se juntou pra aprender sem medo,\nInteligência artificial não é mais segredo.",
         notas: "Confere o gerador (aba 10 Gemini / aba 9 Suno). Pronta e boa → toca de lá, 40 s, 'estreia mundial'. Não pronta / ruim / nome errado → 'a IA erra; vamos com a de ontem' → este arquivo. Silêncio durante a música. Depois: 'faz dois anos custava um estúdio'. Se ficou ruim, pede de novo: 'mais lenta', 'tira o meio'."
       },
       {
         tipo: "chamada",
         titulo: "Leve para casa",
         texto: "Descreva como para um desenhista que nunca te viu.",
-        notas: "PC roxo: monte seu pedido de imagem em 3 cliques e leve pro celular. Criança pede com o adulto do lado, sem foto dela. Cartão: fórmula atrás. QR: ferramentas grátis (com/sem cadastro) + aula gratuita [DIA]. Próximo tópico 11:15: 'o problema não é a IA, é o pedido'."
+        notas: "PC roxo: monte seu pedido de imagem em 3 cliques e leve pro celular. Criança pede com o adulto do lado, sem foto dela. QR: ferramentas grátis (com/sem cadastro) + aula gratuita [DIA]. Próximo tópico: 'o problema não é a IA, é o pedido'."
       }
     ]
   },
@@ -166,7 +166,7 @@ window.SHOWS = {
           "E — Explique a tarefa",
           "D — Detalhe o contexto",
           "I — Indique o formato",
-          "R — Revise: refine e confira"
+          "R — Revise: peça de novo e confira"
         ],
         rodape: "Você é ___. Preciso de ___. É para ___. Entregue como ___.",
         notas: "Aponta linha a linha com exemplo: 'vendedor experiente' / '3 frases pro Instagram' / 'Londrina, almoço, trabalhador' / 'lista, 15 palavras, com emoji'. 'Se você não diz, ela escolhe o mais comprido.' Funciona pra e-mail, contrato, sogra, geladeira, carta do INSS. '30 segundos a mais no pedido.'"
@@ -193,7 +193,7 @@ window.SHOWS = {
         tipo: "chamada",
         titulo: "Leve para casa",
         texto: "IA boa é IA bem pedida — e conferida.",
-        notas: "PC azul: pedido em 5 cliques + ache o erro escondido (< 30 s = melhor que a maioria). Comerciante: descrição de produto hoje; estudante: resumo; aposentado: carta do INSS. Cartão: fórmula atrás. QR: colinha com 8 pedidos + aula gratuita [DIA]. Próximo tópico 11:45: 'ensino o computador a reconhecer um joinha ao vivo'."
+        notas: "PC azul: pedido em 5 cliques + ache o erro escondido (< 30 s = melhor que a maioria). Comerciante: descrição de produto hoje; estudante: resumo; aposentado: carta do INSS. QR: colinha com 8 pedidos + aula gratuita [DIA]. Próximo tópico: 'ensino o computador a reconhecer um joinha ao vivo'."
       }
     ]
   },
@@ -208,7 +208,7 @@ window.SHOWS = {
         midia: "midia/teachable-machine.mp4",
         legenda: "Só a mão de um adulto. Nada fica salvo.",
         alternativa: ["1. Mostro 30 fotos de MÃO ABERTA", "2. Mostro 30 fotos de JOINHA", "3. Clico em TREINAR (20 segundos)", "4. Testo: ele acerta sozinho"],
-        notas: "Com webcam + internet: Teachable Machine (aba 11), câmera na bancada, voluntário adulto, classes 'mão aberta' e 'joinha' (30 amostras cada), treinar 20 s, testar. Errou? 'Mostra mais exemplos.' Sem webcam/internet: toca este vídeo e narra por cima. 'Não expliquei o que é um dedo. Só mostrei exemplos.' Fecha a aba sem salvar."
+        notas: "Com webcam + internet: Teachable Machine (aba 11), câmera na bancada, voluntário adulto, classes 'mão aberta' e 'joinha' (30 amostras cada), treinar 20 s, testar. Errou? 'Mostra mais exemplos.' SEM webcam/internet: se midia/teachable-machine.mp4 existir, toca o vídeo e narra por cima (se for ilustração feita por IA, e não gravação real, diga isso em voz alta); se não existir, a tela mostra os 4 passos em texto — narre apontando linha a linha e faça o gesto com a própria mão. 'Não expliquei o que é um dedo. Só mostrei exemplos.' Fecha a aba sem salvar."
       },
       {
         tipo: "frase",
@@ -238,15 +238,15 @@ window.SHOWS = {
         tipo: "imagens",
         titulo: "Desenha. Ele adivinha.",
         midia: ["midia/incriveis/quick-draw.jpg"],
-        legenda: "Ele aprendeu com 50 milhões de desenhos. Principalmente ruins.",
+        legenda: "Ele aprendeu com mais de 1 bilhão de desenhos. Principalmente ruins.",
         revelar: "Ele chuta antes de você terminar.",
-        notas: "Com internet: Quick, Draw! (aba 12) com criança + adulto ao lado, ou jovem; sem câmera. 1–2 rodadas, 60 s; lê os chutes em voz alta. Sem internet: imagem midia/incriveis/quick-draw.jpg + pasta midia/rostos ('essa pessoa existe?'), público vota. Ninguém quer? O instrutor desenha mal de propósito. 'Em casa: está no QR do cartão, grátis, sem cadastro.'"
+        notas: "Com internet: Quick, Draw! (aba 12) com criança + adulto ao lado, ou jovem; sem câmera. 1–2 rodadas, 60 s; lê os chutes em voz alta. Sem internet: imagem midia/incriveis/quick-draw.jpg + pasta midia/rostos ('essa pessoa existe?'), público vota. Ninguém quer? O instrutor desenha mal de propósito. 'Em casa: está no QR, grátis, sem cadastro.'"
       },
       {
         tipo: "chamada",
         titulo: "Leve para casa",
         texto: "O computador não sabe — ele chuta muito bem.",
-        notas: "3 frases: aprende por exemplo; não sabe, chuta; chuta bem — por isso cria, erra com confiança e golpista usa. 'Vai dominar o mundo? Ela não quer nada; quem quer é quem aperta o botão.' PC verde: proxima-palavra. 3 sites (fim da trilha verde e QR do cartão): desenhos, rostos, plantas. QR + aula gratuita [DIA]. Último tópico 12:15: golpes — 'o mais importante dos cinco'."
+        notas: "3 frases: aprende por exemplo; não sabe, chuta; chuta bem — por isso cria, erra com confiança e golpista usa. 'Vai dominar o mundo? Ela não quer nada; quem quer é quem aperta o botão.' PC verde: proxima-palavra. 3 sites (fim da trilha verde e QR): desenhos, rostos, plantas. QR + aula gratuita [DIA]. Último tópico: golpes — 'o mais importante dos cinco'."
       }
     ]
   }

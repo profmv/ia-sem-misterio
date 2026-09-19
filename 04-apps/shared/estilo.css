@@ -205,8 +205,18 @@ img { max-width: 100%; }
 
 .alerta-lista { list-style: none; padding: 0; margin: 0; }
 .alerta-lista li { padding: 10px 0 10px 44px; position: relative; border-bottom: 1px dashed var(--borda); }
-.alerta-lista li::before { content: "🚩"; position: absolute; left: 4px; top: 8px; font-size: 1.3rem; }
-.alerta-lista.dicas li::before { content: "✅"; }
+/* Marcadores em ícone Lucide (ISC, mesmos paths de shared/icones.js) via máscara: a cor vem da variável CSS */
+.alerta-lista li::before {
+  content: ""; position: absolute; left: 4px; top: 13px; width: 1.4rem; height: 1.4rem;
+  background: var(--errado);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 22V4a1 1 0 0 1 .4-.8A6 6 0 0 1 8 2c3 0 5 2 7.333 2q2 0 3.067-.8A1 1 0 0 1 20 4v10a1 1 0 0 1-.4.8A6 6 0 0 1 16 16c-3 0-5-2-8-2a6 6 0 0 0-4 1.528' /%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 22V4a1 1 0 0 1 .4-.8A6 6 0 0 1 8 2c3 0 5 2 7.333 2q2 0 3.067-.8A1 1 0 0 1 20 4v10a1 1 0 0 1-.4.8A6 6 0 0 1 16 16c-3 0-5-2-8-2a6 6 0 0 0-4 1.528' /%3E%3C/svg%3E") center / contain no-repeat;
+}
+.alerta-lista.dicas li::before {
+  background: var(--certo);
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10' /%3E%3Cpath d='m16 9-5.5 5.5L8 12' /%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10' /%3E%3Cpath d='m16 9-5.5 5.5L8 12' /%3E%3C/svg%3E");
+}
 
 /* ---------- Aviso de inatividade (util.js) ---------- */
 

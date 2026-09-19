@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Golpe ou seguro? — Não caia em golpe</title>
   <link rel="stylesheet" href="../shared/estilo.css">
+  <link rel="stylesheet" href="../shared/animacoes.css">
   <style>
     .conteudo { padding-top: 14px; padding-bottom: 14px; }
 
@@ -191,6 +192,16 @@
       .placar { font-size: 2.9em; }
       .regra .passos-regra { font-size: 1.8em; }
     }
+
+    /* ---------- Celular (390 px): cabeçalho da rodada quebra linha e botões GOLPE/SEGURO cabem lado a lado ---------- */
+    @media (max-width: 640px) {
+      .inicio-exemplo { flex-wrap: wrap; gap: 8px 14px; }
+      .rodada-topo { flex-wrap: wrap; gap: 8px 12px; }
+      .rodada-topo .progresso { flex: 1 1 100%; order: 3; }
+      .respostas { gap: 12px; }
+      .btn-resposta, body.simples .btn-resposta { min-height: 84px; font-size: 1.3rem; padding: 10px 8px; gap: 6px; }
+      .btn-resposta .ico { font-size: 1.6rem; }
+    }
   </style>
 </head>
 <body class="t-perigos">
@@ -272,7 +283,9 @@
   </main>
 
   <script src="../shared/config.js"></script>
+  <script src="../shared/icones.js"></script>
   <script src="../shared/util.js"></script>
+  <script src="../shared/efeitos.js"></script>
   <script src="cenarios.dados.js"></script>
   <script src="app.js"></script>
 </body>

@@ -31,7 +31,7 @@
   var NIVEL = { facil: 0, medio: 1, dificil: 2 };
   var TOTAL = IA.SIMPLES ? 6 : 10;
 
-  var partida = [], rodada = 0, acertos = 0, vistos = {};
+  var partida = [], rodada = 0, acertos = 0, vistos = {}, seguidos = 0;
 
   $("#inicio-frase").textContent = IA.SIMPLES
     ? "Leia 6 mensagens e diga: é golpe ou é seguro?"
@@ -311,6 +311,7 @@
     partida = sortearPartida();
     rodada = 0;
     acertos = 0;
+    seguidos = 0;
     partida.forEach(function (c) { vistos[c.id] = true; });
     if (!DEBUG) IA.contar("detector_iniciado");
     mostrarRodada();
@@ -331,6 +332,7 @@
     palco.appendChild(balao(c, false));
     $("#btn-golpe").disabled = false;
     $("#btn-seguro").disabled = false;
+    if (rodada > 0) IA.som("rodada");
     IA.mostrarTela("tela-rodada");
   }
 
@@ -341,7 +343,11 @@
     var c = partida[rodada];
     var acertou = escolha === c.resposta;
     if (acertou) acertos++;
-    mostrarFeedback(c, escolha, acertou);
+    seguidos = acertou ? seguidos + 1 : 0;
+    // guarda onde o visitante clicou: o confete sai dali (o botão some ao trocar de tela)
+    var alvo = $(escolha === "golpe" ? "#btn-golpe" : "#btn-seguro");
+    var r = alvo.getBoundingClientRect();
+    mostrarFeedback(c, escolha, acertou, { x: r.left + r.width / 2, y: r.top + r.height / 2 });
   }
 
   $("#btn-golpe").addEventListener("click", function () { responder("golpe"); });
@@ -353,7 +359,7 @@
 
   function rotuloResposta(r) { return r === "golpe" ? "🚩 GOLPE" : "✅ SEGURO"; }
 
-  function mostrarFeedback(c, escolha, acertou) {
+  function mostrarFeedback(c, escolha, acertou, ondeClicou) {
     situacao($("#fb-situacao"), c);
     var palco = $("#fb-palco");
     palco.innerHTML = "";
@@ -394,8 +400,12 @@
     }));
 
     $("#btn-proxima").textContent = rodada >= partida.length - 1 ? "Ver resultado ▶" : "Próxima ▶";
-    if (acertou && !DEBUG) IA.festa();
     IA.mostrarTela("tela-feedback");
+    // efeitos depois de trocar de tela (a caixa de feedback já está visível)
+    if (!DEBUG) {
+      if (acertou) IA.acerto(ondeClicou, { sequencia: seguidos });
+      else IA.erro($("#fb-resultado"));
+    }
   }
 
   $("#btn-proxima").addEventListener("click", function () {
@@ -431,8 +441,13 @@
       : "";
 
     if (!DEBUG) IA.contar("detector_concluido");
-    if (taxa >= 0.5 && !DEBUG) IA.festa();
     IA.mostrarTela("tela-resultado");
+    // sempre encorajador: quem foi bem ganha show de fogos, quem não foi ganha um som de etapa
+    if (!DEBUG) {
+      if (taxa >= 0.8) IA.festa("grande");
+      else if (taxa >= 0.5) IA.festa("medio");
+      else IA.som("etapa");
+    }
   }
 
   $("#btn-comecar").addEventListener("click", comecar);

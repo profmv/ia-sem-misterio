@@ -1,0 +1,22 @@
+IA sem Misterio - versao para usar neste computador
+====================================================
+
+COMO ABRIR
+1. Extraia TODO o ZIP (botao direito > Extrair tudo). Nao abra de dentro do ZIP.
+2. De duplo clique em ABRIR-SITE.bat (abre no Chrome ou no Edge).
+   Em Mac/Linux, abra o arquivo index.html no navegador.
+   Se o Windows mostrar um aviso de seguranca, e porque o arquivo veio da internet:
+   clique em "Mais informacoes" e depois em "Executar assim mesmo".
+
+O QUE FUNCIONA SEM INTERNET
+- Slides dos 4 topicos (index.html > Ver a apresentacao). Atalhos: seta direita/esquerda,
+  N = notas, F = tela cheia, T = transcricao, Enter = tocar audio/video.
+- Portal e os 4 jogos: Golpe ou seguro?, Mestre do Prompt, Monte seu pedido, Proxima Palavra.
+- Audios e videos da oficina.
+
+O QUE PRECISA DE INTERNET
+- O gerador de imagens da tela final do "Monte seu pedido".
+- Os links para sites externos (Quick, Draw!, Which Face Is Real, Pl@ntNet, Bing Image Creator,
+  FLUX, AI Duet, Teachable Machine, Duck.ai...).
+
+Versao publicada: https://profmv.github.io/ia-sem-misterio/

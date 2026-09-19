@@ -12,6 +12,7 @@
                     o atalho ABRIR-vitrine.bat já libera o som automático no Chrome)
     Os textos das cartelas vêm de 04-apps/portal/dados-trilhas.js (campo "ocioso").
   -->
+  <link rel="stylesheet" href="../04-apps/shared/animacoes.css">
   <style>
     html, body { margin: 0; height: 100%; background: #101216; color: #fff; overflow: hidden; cursor: none;
       font-family: "Segoe UI", system-ui, Arial, sans-serif; }
@@ -23,9 +24,6 @@
     .selo { display: inline-block; margin-top: -3vh; background: #B3261E; color: #fff; font-weight: 800; font-size: 3.2vh; padding: 1vh 2.4vw; border-radius: 99px; transform: rotate(-3deg); }
     .titulo { font-size: 8.5vh; font-weight: 800; line-height: 1.05; margin: 4vh 0 2vh; letter-spacing: -.02em; max-width: 88vw; }
     .texto { font-size: 4.6vh; opacity: .92; max-width: 80vw; }
-    .agenda { font-size: 5vh; line-height: 1.5; text-align: left; margin-top: 2vh; }
-    .agenda .hora { color: #F2B705; font-weight: 800; display: inline-block; min-width: 8ch; }
-    .agenda .passou { opacity: .35; text-decoration: line-through; }
     .qr-box { background: #fff; padding: 2vh; border-radius: 2vh; line-height: 0; margin-top: 2vh; }
     .qr-box svg { width: 34vh; height: 34vh; }
     .url { font-size: 4vh; font-weight: 800; color: #F2B705; margin-top: 2vh; }
@@ -41,6 +39,7 @@
   <div class="rodape" id="rodape"></div>
 
   <script src="../04-apps/shared/config.js"></script>
+  <script src="../04-apps/shared/icones.js"></script>
   <script src="../04-apps/shared/qrcode.js"></script>
   <script src="../04-apps/shared/util.js"></script>
   <script src="../04-apps/portal/dados-trilhas.js"></script>
@@ -54,26 +53,17 @@
     // Caminhos das cartelas do portal são relativos a 04-apps/portal/: ajustar para esta pasta
     function caminho(src) { return src ? src.replace("../../05-apresentacao/", "") : src; }
 
-    var cartelas = base.map(function (c) { return Object.assign({}, c, { imagem: caminho(c.imagem) }); });
-    cartelas.splice(2, 0, { agenda: true });
+    // Sem horários fixos: cartelas "próximo tópico" (com hora) não entram no giro
+    var cartelas = base.filter(function (c) { return !c.proximoShow; })
+      .map(function (c) { return Object.assign({}, c, { imagem: caminho(c.imagem) }); });
     if (EV.marca && EV.marca.linkMateriais) cartelas.push({ qr: true });
 
     if (IA.parametro("reservado") === "1") document.getElementById("reservado").hidden = false;
-
-    function minutos(h) { var p = h.split(":"); return (+p[0]) * 60 + (+p[1]); }
 
     function desenhar(c) {
       palco.innerHTML = "";
       palco.style.animation = "none"; void palco.offsetWidth; palco.style.animation = "";
 
-      if (c.agenda) {
-        var agora = new Date(), min = agora.getHours() * 60 + agora.getMinutes();
-        palco.appendChild(el("div", { class: "titulo" }, ["🎤 Tópicos de 8 minutos, aqui dentro"]));
-        palco.appendChild(el("div", { class: "agenda" }, (EV.shows || []).map(function (s) {
-          return el("div", { class: minutos(s.hora) + 8 < min ? "passou" : "" }, [el("span", { class: "hora" }, [s.hora]), s.titulo]);
-        })));
-        return true;
-      }
       if (c.qr) {
         var q = IA.qr(EV.marca.linkMateriais, 400);
         palco.appendChild(el("div", { class: "titulo", style: "font-size:7vh" }, [(EV.oferta && EV.oferta.titulo) || "Leve o material"]));
@@ -81,12 +71,6 @@
         if (q) palco.appendChild(el("div", { class: "qr-box" }, [q.firstChild]));
         palco.appendChild(el("div", { class: "url" }, [IA.urlCurta(EV.marca.linkMateriais)]));
         return true;
-      }
-      var titulo = c.titulo;
-      if (c.proximoShow) {
-        var s = IA.proximoShow();
-        if (!s) return false;
-        titulo = s.faltam <= 0 ? "Tópico AGORA: " + s.titulo : "Próximo tópico às " + s.hora;
       }
       if (c.imagem) {
         var img = el("img", { class: "img", src: c.imagem, alt: "" });
@@ -96,7 +80,7 @@
       } else {
         palco.appendChild(el("div", { class: "icone" }, [c.icone || "✨"]));
       }
-      palco.appendChild(el("div", { class: "titulo" }, [titulo]));
+      palco.appendChild(el("div", { class: "titulo" }, [c.titulo]));
       if (c.texto) palco.appendChild(el("div", { class: "texto" }, [c.texto]));
       return true;
     }
@@ -109,11 +93,9 @@
         i++;
         if (desenhar(c)) break;
       }
-      var s = IA.proximoShow();
       document.getElementById("rodape").innerHTML = "";
       document.getElementById("rodape").appendChild(el("div", {}, [
-        el("span", { class: "grande" }, ["GRÁTIS · ENTRE"]), "  ·  " + (EV.nomeOficina || "") +
-        (s && s.faltam > 0 ? "  ·  próximo tópico " + s.hora : "")
+        el("span", { class: "grande" }, ["GRÁTIS · ENTRE"]), "  ·  " + (EV.nomeOficina || "")
       ]));
     }
     girar();

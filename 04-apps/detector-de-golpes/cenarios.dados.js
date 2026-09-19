@@ -21,12 +21,10 @@
  *   - Consulta de dinheiro esquecido (Banco Central) é grátis, só no site oficial; o BC não manda links.
  *     https://valoresareceber.bcb.gov.br
  *   - Pix: contestação (MED) pelo app do banco, até 80 dias contados do Pix. Ver 03-conteudo/perigos-casos-e-canais.md, seção 3.
- *   - Eleições 2026: PROPAGANDA ELEITORAL feita com IA tem de vir com aviso (Res. TSE 23.610/2019 alterada pela 23.755/2026).
- *     A regra não vale para "todo vídeo com IA"; conferido em 17/09/2026.
  */
 window.CENARIOS = [
 
-  /* ======================= GOLPES (14) ======================= */
+  /* ======================= GOLPES (20) ======================= */
 
   {
     id: "voz-clonada-neto",
@@ -315,26 +313,162 @@ window.CENARIOS = [
   },
 
   {
-    id: "video-bombastico-eleicao",
+    id: "video-bombastico-poupanca",
     canal: "whatsapp",
     remetente: "Família Unida 👪",
     visual: { status: "grupo", avatar: "👪", encaminhado: true, video: "0:42", hora: "19:58" },
-    texto: "🚨 BOMBA!!! Vazou vídeo do candidato confessando que vai acabar com a aposentadoria se ganhar. A TV está escondendo! Compartilhe em 20 grupos ANTES QUE APAGUEM! Faltam poucos dias para a eleição!!!",
+    texto: "🚨 BOMBA!!! Vazou vídeo de um apresentador famoso avisando que o governo vai bloquear a poupança de todo mundo na segunda. A TV está escondendo! Compartilhe em 20 grupos ANTES QUE APAGUEM!!!",
     resposta: "golpe",
     sinais: [
       "Escândalo e urgência: “bomba”, “antes que apaguem”.",
       "Pede para espalhar, não para conferir.",
       "“Encaminhado com frequência” e nenhuma fonte citada.",
-      "Na eleição, propaganda feita com IA tem de vir com aviso — golpista não avisa."
+      "Vídeo “vazado” de gente famosa pode ser deepfake: rosto e voz imitados por IA."
     ],
-    fazer: "Não compartilhe no calor da emoção. Procure a notícia em jornais e agências de checagem; se ninguém confirmou, não passe adiante — vale para qualquer candidato.",
+    fazer: "Não compartilhe no calor da emoção. Procure a notícia em jornais e agências de checagem; se ninguém confirmou, não passe adiante — vale para qualquer notícia bombástica.",
     usaIA: true,
-    comoIA: "Rosto e voz de um político podem ser imitados por IA em vídeo: é o chamado deepfake.",
+    comoIA: "Rosto e voz de uma pessoa famosa podem ser imitados por IA em vídeo: é o chamado deepfake.",
     dificuldade: "dificil",
     publico: "todos"
   },
 
-  /* ======================= SEGUROS (5) ======================= */
+  {
+    id: "motoboy-recolhe-cartao",
+    canal: "ligacao",
+    remetente: "Central de Prevenção a Fraudes",
+    visual: { numero: "(11) 3•••-••40", rotulo: "Chamada recebida" },
+    contexto: "Ligam dizendo que é do seu banco. Pedem que você desligue e ligue para o número do verso do cartão — e a ligação parece continuar normal.",
+    texto: "Seu cartão foi clonado, senhor. Já cancelamos. Para sua segurança, um motoboy do banco passa aí em 30 minutos para buscar o cartão antigo. Corte ao meio, mas deixe o chip inteiro. Antes, digite sua senha no telefone para o cancelamento ficar registrado.",
+    textoSimples: "Seu cartão foi clonado. Um motoboy do banco vai buscar o cartão aí. Digite sua senha agora para cancelar.",
+    resposta: "golpe",
+    sinais: [
+      "Banco nenhum manda alguém buscar cartão na sua casa.",
+      "Pediu senha: senha e código, ninguém pede, ninguém dá.",
+      "O golpista não desliga a linha: você disca e cai nele de novo.",
+      "Cortar o cartão deixando o chip inteiro é justamente o que o ladrão quer."
+    ],
+    fazer: "Não entregue o cartão e não digite senha. Desligue e ligue de OUTRO telefone (ou espere 1 minuto e confira o tom de discar) para o número do verso do cartão. Se já entregou, peça o bloqueio na hora e registre B.O. on-line na Polícia Civil do PR.",
+    fazerSimples: "Não entregue o cartão e não diga a senha. Ligue de outro telefone para o banco.",
+    usaIA: false,
+    dificuldade: "medio",
+    publico: "idoso"
+  },
+
+  {
+    id: "codigo-de-seis-digitos",
+    canal: "whatsapp",
+    remetente: "Tia Nilza ❤️",
+    visual: { status: "salvo", avatar: "👵", hora: "18:33" },
+    contexto: "Chega mensagem da sua tia, do número de sempre. Um minuto antes, chegou um SMS com um código de 6 números que você não pediu.",
+    texto: "Oi, querido! Fui cadastrar uma coisa e coloquei seu número sem querer 🤦. Chegou um código de 6 números aí? Me passa rapidinho que eu preciso terminar antes das 19h, por favor!",
+    textoSimples: "Chegou um código de 6 números no seu celular? Me passa rapidinho, coloquei seu número sem querer!",
+    resposta: "golpe",
+    sinais: [
+      "Código que chega sem você ter pedido nada é para ENTRAR na sua conta.",
+      "A conta da tia provavelmente já foi roubada: quem escreve é o golpista.",
+      "Pressa outra vez: “antes das 19h”.",
+      "Contato salvo não prova nada — prova é a pessoa falando ao vivo."
+    ],
+    fazer: "Não passe o código para ninguém, nem para parente. Ligue para a sua tia no número de sempre e avise que a conta dela pode ter sido roubada. Ative a confirmação em duas etapas do WhatsApp (Configurações → Conta).",
+    fazerSimples: "Nunca passe o código para ninguém. Ligue para a sua tia e avise.",
+    usaIA: false,
+    dificuldade: "medio",
+    publico: "todos"
+  },
+
+  {
+    id: "entrega-taxa-alfandega",
+    canal: "sms",
+    remetente: "SMS 27•••",
+    visual: { hora: "13:52" },
+    contexto: "Você comprou um fone pela internet na semana passada.",
+    texto: "SUA ENCOMENDA ESTÁ RETIDA. Pendência de taxa de R$ 4,87. Regularize em 24h ou o pacote será devolvido ao remetente: rastreio-entrega24h.info/pagar",
+    textoSimples: "Sua encomenda está parada. Pague R$ 4,87 neste link em 24 horas ou ela volta.",
+    resposta: "golpe",
+    sinais: [
+      "Valor pequeno de propósito: você paga sem pensar e entrega os dados do cartão.",
+      "Prazo curto para você não conferir.",
+      "Endereço estranho, que não é o dos Correios nem o da loja.",
+      "Chegou por SMS, e não dentro do app onde você comprou."
+    ],
+    fazer: "Não clique. Abra o app ou o site da loja que você mesmo usou e veja o rastreio por lá. Taxa de verdade aparece no canal oficial, nunca só por SMS.",
+    fazerSimples: "Não clique. Veja o rastreio no app da loja onde você comprou.",
+    usaIA: false,
+    dificuldade: "facil",
+    publico: "todos"
+  },
+
+  {
+    id: "investimento-jornalista-falso",
+    canal: "anuncio",
+    remetente: "Renda Livre · Patrocinado",
+    visual: { avatar: "📈", emoji: "🎙️", legenda: "▶ VÍDEO · “âncora de telejornal”", botao: "Quero participar" },
+    contexto: "Vídeo patrocinado no seu feed, com cara de reportagem de telejornal.",
+    texto: "Âncora do jornal anuncia: “Plataforma brasileira paga R$ 300 por dia para quem investir R$ 200 hoje.” Vagas no grupo de VIPs encerram à meia-noite. Últimos 9 lugares. Clique e fale com nosso consultor no WhatsApp.",
+    textoSimples: "Vídeo do jornal diz: invista R$ 200 e ganhe R$ 300 por dia. Só até meia-noite!",
+    resposta: "golpe",
+    sinais: [
+      "Ganho garantido e altíssimo: investimento de verdade não promete isso.",
+      "Cara de telejornal, mas a notícia não existe em nenhum jornal.",
+      "Rosto e voz de jornalista podem ser imitados por IA.",
+      "Tudo termina num grupo de WhatsApp com “consultor”."
+    ],
+    fazer: "Não clique e não fale com o “consultor”. Procure o nome da empresa no site da CVM (cvm.gov.br) e a notícia no site do próprio jornal. Denuncie o anúncio na rede social.",
+    fazerSimples: "Não clique. Dinheiro fácil garantido é golpe.",
+    usaIA: true,
+    comoIA: "O rosto e a voz do apresentador foram imitados por IA num vídeo que ele nunca gravou.",
+    dificuldade: "medio",
+    publico: "jovem"
+  },
+
+  {
+    id: "comprovante-falso-balcao",
+    canal: "loja",
+    remetente: "Cliente no balcão",
+    visual: {
+      emoji: "🧾", produto: "2 botijões de gás · R$ 220",
+      selo: "📱 “Olha aqui, já mandei”", endereco: "Comprovante mostrado na tela do celular"
+    },
+    contexto: "Você tem uma revenda de gás. O cliente mostra na tela do celular um comprovante de Pix de R$ 220 e pede para levar a mercadoria.",
+    texto: "Pronto, patrão, já fiz o Pix! Olha o comprovante aqui na tela. Deve estar demorando por causa do horário, o banco tá lento hoje. Deixa eu já levar que o carro tá em fila dupla lá fora.",
+    textoSimples: "“Já fiz o Pix, olha o comprovante!” Mas o dinheiro ainda não apareceu na sua conta.",
+    resposta: "golpe",
+    sinais: [
+      "Comprovante na tela é uma imagem: dá para editar em segundos.",
+      "Pix de verdade cai na hora, a qualquer horário.",
+      "Pressa para sair antes de você conferir.",
+      "Quem confirma o pagamento é o seu extrato, não a tela do cliente."
+    ],
+    fazer: "Só entregue depois de ver o valor entrando no SEU extrato ou no maquininha/app da sua conta. Se já entregou, guarde as imagens e registre B.O. on-line na Polícia Civil do PR.",
+    fazerSimples: "Só entregue depois de ver o dinheiro na sua conta.",
+    usaIA: false,
+    dificuldade: "medio",
+    publico: "comerciante"
+  },
+
+  {
+    id: "corte-de-energia-hoje",
+    canal: "ligacao",
+    remetente: "Atendimento · Energia",
+    visual: { numero: "(43) 3•••-••08", rotulo: "Chamada recebida" },
+    contexto: "Ligam dizendo que é da companhia de energia.",
+    texto: "Boa tarde. Consta uma fatura de outubro em aberto no seu endereço e a equipe de corte já está na rua. Dá para evitar o corte pagando agora por Pix: vou passar a chave, é CPF. O senhor manda o comprovante para este mesmo número.",
+    textoSimples: "Sua luz vai ser cortada hoje! Pague agora um Pix para a chave que eu vou passar.",
+    resposta: "golpe",
+    sinais: [
+      "Susto e prazo de minutos: é a receita do golpe.",
+      "Pix para chave que é CPF de pessoa física, não da empresa.",
+      "Foram eles que ligaram — e querem o pagamento fora dos canais da conta.",
+      "Você não conferiu a fatura em lugar nenhum."
+    ],
+    fazer: "Desligue. Confira a fatura no app ou no site da concessionária que você mesmo abriu, ou na conta de papel. Nunca pague por Pix passado no telefone.",
+    fazerSimples: "Desligue. Confira a conta de luz no app ou no papel.",
+    usaIA: false,
+    dificuldade: "facil",
+    publico: "todos"
+  },
+
+  /* ======================= SEGUROS (7) ======================= */
 
   {
     id: "filha-chegou-de-viagem",
@@ -441,6 +575,50 @@ window.CENARIOS = [
     fazerSimples: "Aviso de verdade. Banco nunca pede senha.",
     usaIA: false,
     dificuldade: "medio",
+    publico: "todos"
+  },
+
+  {
+    id: "rastreio-no-app-da-loja",
+    canal: "app",
+    remetente: "App da loja onde você comprou",
+    visual: { avatar: "📦", nota: "aberto por você" },
+    contexto: "Você comprou um fone semana passada. Abriu o app da loja para ver onde está.",
+    texto: "Pedido nº 77120 · Seu fone saiu para entrega hoje. Previsão: até as 18h. Acompanhe em “Meus pedidos”. Nenhuma taxa adicional é cobrada para esta entrega.",
+    textoSimples: "Seu pedido saiu para entrega hoje. Não tem nenhuma taxa para pagar.",
+    resposta: "seguro",
+    sinais: [
+      "Você abriu o app; ninguém mandou link para você.",
+      "É a compra que você mesmo fez.",
+      "Não pede pagamento, senha nem dado novo.",
+      "O número do pedido bate com o que está na sua conta."
+    ],
+    fazer: "Tudo certo. Guarde a regra: rastreio se confere DENTRO do app ou site que você mesmo abriu — nunca por link de SMS.",
+    fazerSimples: "Tudo certo. Veja rastreio sempre no app, nunca por link de SMS.",
+    usaIA: false,
+    dificuldade: "medio",
+    publico: "todos"
+  },
+
+  {
+    id: "codigo-que-voce-pediu",
+    canal: "sms",
+    remetente: "SMS do aplicativo",
+    visual: { hora: "20:07" },
+    contexto: "Você trocou de celular e está instalando o WhatsApp de novo. A tela do aplicativo está pedindo o código neste momento.",
+    texto: "482-193 é o seu código de verificação. Não compartilhe este código com ninguém.",
+    textoSimples: "482-193 é o seu código. Não passe para ninguém.",
+    resposta: "seguro",
+    sinais: [
+      "Foi você que pediu, agora, na tela do seu aparelho.",
+      "O código é para você DIGITAR no aplicativo, não para repassar.",
+      "A própria mensagem avisa: não compartilhe.",
+      "Ninguém entrou em contato pedindo nada."
+    ],
+    fazer: "Digite o código só na tela do aplicativo. Se um dia chegar um código que você NÃO pediu, é sinal de que alguém está tentando entrar na sua conta: não passe para ninguém, nem para parente.",
+    fazerSimples: "Digite o código no aplicativo. Nunca mande o código para outra pessoa.",
+    usaIA: false,
+    dificuldade: "dificil",
     publico: "todos"
   }
 ];
