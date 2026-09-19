@@ -223,16 +223,11 @@
       linksNoVisual ? null : caixaLinks
     ]);
 
-    /* A CARTELA COM PERGUNTA TRANCA O "PRÓXIMO" (pedido do instrutor, 19/09).
-       Onde a tela começa com uma atividade — "Quem dessas pessoas existe?", "Escute esta voz" —
-       dava para apertar Próximo e passar direto, sem nunca ver a resposta, que é o conteúdo da
-       tela. Enquanto a resposta não for revelada o botão fica `disabled`, e só isso já entrega as
-       três coisas pedidas: `estilo.css` o deixa transparente (`.btn[disabled]`), `animacoes.css`
-       o tira do halo e do brilho (`:not([disabled])`) e o navegador ignora o clique — o som de
-       clique também, porque `efeitos.js` pula alvo com `disabled`.
-       "Pular ⏭" continua livre de propósito: ali a pessoa está dizendo que quer sair do VER
-       inteiro, e não passando pela resposta sem ver. */
-    var esperandoResposta = !!c.revelar, btnProximo = null;
+    /* OPCIONAL, DESLIGADO: trancar o "Próximo" até a resposta ser revelada. Não foi pedido; o comportamento
+       original (Próximo sempre livre) foi mantido. Para ligar, mude TRANCAR_PROXIMO_ATE_REVELAR para true:
+       o botão fica `disabled` (estilo.css/animacoes.css/efeitos.js já tratam `disabled`) até "Ver a resposta". */
+    var TRANCAR_PROXIMO_ATE_REVELAR = false;
+    var esperandoResposta = TRANCAR_PROXIMO_ATE_REVELAR && !!c.revelar, btnProximo = null;
     function liberarProximo() {
       esperandoResposta = false;
       if (!btnProximo) return;
