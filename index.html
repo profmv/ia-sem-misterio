@@ -28,17 +28,17 @@
     .acoes a small { display: block; font-weight: 500; opacity: .9; font-size: .82rem; margin-top: 2px; }
     details { margin-top: 12px; border-top: 1px solid var(--borda); padding-top: 10px; }
     summary { cursor: pointer; font-weight: 800; font-size: 1.05rem; padding: 6px 0; }
-    .frase { font-size: 1.15rem; font-weight: 800; margin: 8px 0; }
-    .regra { background: var(--fundo); border-radius: 12px; padding: 12px 14px; margin: 8px 0; }
-    .regra b { display: block; margin-bottom: 4px; color: var(--cor); }
-    .regra div.l { font-weight: 800; font-size: 1.05rem; }
-    .regra .rod { margin-top: 6px; font-size: .95rem; color: var(--texto-suave); }
-    ul.dicas { margin: 8px 0; padding-left: 20px; } ul.dicas li { margin: 4px 0; }
-    .ferr { display: block; text-decoration: none; color: inherit; border: 2px solid var(--borda); border-radius: 12px; padding: 10px 12px; margin: 8px 0; }
+    .frase { font-size: 1.15rem; font-weight: 800; margin: 10px 0 12px; line-height: 1.3; }
+    .rot { font-size: .8rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--texto-suave); margin: 14px 0 6px; }
+    .passos { display: flex; flex-wrap: wrap; gap: 6px; }
+    .passos span { border: 2px solid var(--cor); color: var(--cor); font-weight: 800; border-radius: 999px; padding: 4px 12px; font-size: .95rem; }
+    .nota { margin: 8px 0 0; font-size: .95rem; color: var(--texto-suave); }
+    .links { display: grid; gap: 8px; }
+    .ferr { display: flex; align-items: center; gap: 12px; text-decoration: none; color: var(--texto); background: var(--fundo); border: 2px solid var(--borda); border-radius: 14px; padding: 12px 14px; min-height: 60px; }
     .ferr:hover, .ferr:focus-visible { border-color: var(--cor); }
-    .ferr strong { color: var(--link); }
-    .ferr span { display: block; font-size: .92rem; color: var(--texto-suave); }
-    .etq { display: inline-block; font-size: .75rem; font-weight: 800; padding: 2px 8px; border-radius: 999px; background: var(--certo-claro); color: var(--certo); margin-left: 6px; }
+    .ferr .ico { flex: none; width: 34px; height: 34px; border-radius: 50%; background: var(--cor); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.1rem; }
+    .ferr strong { display: block; font-size: 1.05rem; line-height: 1.2; }
+    .ferr small { display: block; color: var(--texto-suave); font-size: .88rem; margin-top: 1px; }
     .aviso { background: #fff8e1; border: 2px solid var(--destaque); border-radius: 14px; padding: 12px 14px; margin: 22px 0 0; font-size: .98rem; }
     .rodape { margin-top: 30px; font-size: .9rem; color: var(--texto-suave); }
     .rodape a { color: var(--link); }
@@ -96,6 +96,24 @@
       { n: 4, trilha: "incriveis",     icone: "⭐", cor: "var(--incriveis)" }
     ];
 
+    // Nome curto + uma linha para cada link (as URLs vêm do catálogo do projeto)
+    var LINK = {
+      "teste-phishing-jigsaw": ["Teste de phishing (Google)", "Golpe ou verdadeiro?"],
+      "which-face-is-real":    ["Which Face Is Real", "Qual rosto é de verdade?"],
+      "duck-ai":               ["Duck.ai", "Converse com a IA"],
+      "bing-image-creator":    ["Bing Image Creator", "Crie imagens · login opcional"],
+      "chatgpt-sem-login":     ["ChatGPT", "Converse com a IA"],
+      "quick-draw":            ["Quick, Draw!", "Você desenha, a IA adivinha"],
+      "plantnet":              ["Pl@ntNet", "Foto de planta → nome"]
+    };
+    var LEVAR = {
+      perigos:       { passos: ["PRESSA?", "DESLIGA", "LIGA DE VOLTA", "PERGUNTA A PALAVRA"], nota: "Senha e código: ninguém pede, ninguém dá.",
+                       links: ["teste-phishing-jigsaw", "which-face-is-real"] },
+      generativa:    { passos: ["O QUÊ", "QUE ESTILO", "ONDE", "QUE DETALHES"], links: ["duck-ai", "bing-image-creator"] },
+      produtividade: { passos: ["P Papel", "E Explique", "D Detalhe", "I Indique", "R Revise"], links: ["chatgpt-sem-login", "duck-ai"] },
+      incriveis:     { links: ["quick-draw", "which-face-is-real", "plantnet"] }
+    };
+
     document.getElementById("slogan").textContent = EV.slogan || "";
     document.getElementById("quando").textContent = [EV.data, EV.local].filter(Boolean).join(" · ");
 
@@ -114,25 +132,24 @@
       ]);
       card.appendChild(acoes);
 
-      // Levar para casa
+      // Levar para casa: frase curta + regra em uma linha + links grandes
+      var lv = LEVAR[t.trilha] || {};
       var det = el("details", {}, [el("summary", { text: "Levar para casa" })]);
       if (lev.fraseChave) det.appendChild(el("p", { class: "frase", text: lev.fraseChave }));
-      if (lev.regra) {
-        var r = el("div", { class: "regra" }, [el("b", { text: lev.regra.titulo || "A regra" })]);
-        (lev.regra.linhas || []).forEach(function (l) { r.appendChild(el("div", { class: "l", text: l })); });
-        if (lev.regra.rodape) r.appendChild(el("div", { class: "rod", text: lev.regra.rodape }));
-        det.appendChild(r);
+      if (lv.passos) {
+        det.appendChild(el("div", { class: "rot", text: "A regra" }));
+        det.appendChild(el("div", { class: "passos" }, lv.passos.map(function (x) { return el("span", { text: x }); })));
+        if (lv.nota) det.appendChild(el("p", { class: "nota", text: lv.nota }));
       }
-      if ((lev.dicas || []).length) det.appendChild(el("ul", { class: "dicas" }, lev.dicas.map(function (x) { return el("li", { text: x }); })));
-      var ferrs = (lev.ferramentas || []).map(function (id) { return FER[id]; }).filter(Boolean);
-      if (ferrs.length) {
-        det.appendChild(el("p", { class: "meta", text: "Para testar em casa, no celular:" }));
-        ferrs.forEach(function (f) {
-          det.appendChild(el("a", { class: "ferr", href: f.url, target: "_blank", rel: "noopener noreferrer" }, [
-            el("strong", {}, [f.nome, f.login === "nao" ? el("span", { class: "etq", text: "sem cadastro" }) : null]),
-            el("span", { text: f.descricao || "" })
-          ]));
-        });
+      var itens = (lv.links || []).map(function (id) { var f = FER[id], x = LINK[id]; return f && x ? { url: f.url, nome: x[0], sub: x[1] } : null; }).filter(Boolean);
+      if (itens.length) {
+        det.appendChild(el("div", { class: "rot", text: "Para testar no celular" }));
+        det.appendChild(el("div", { class: "links" }, itens.map(function (f) {
+          return el("a", { class: "ferr", href: f.url, target: "_blank", rel: "noopener noreferrer" }, [
+            el("span", { class: "ico", text: "↗" }),
+            el("span", {}, [el("strong", { text: f.nome }), el("small", { text: f.sub })])
+          ]);
+        })));
       }
       card.appendChild(det);
       raiz.appendChild(card);
